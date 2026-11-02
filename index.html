@@ -127,7 +127,7 @@ footer{color:var(--muted); font-size:13px; padding:8px 0 20px}
       <p class="sub">Cole um link do YouTube e ouça um podcast solo sobre ele.</p>
     </div>
     <div class="row" style="flex:none; flex-direction:column; align-items:flex-end">
-      <button id="btnSettings" class="ghost" type="button">Ajustes</button>
+      <div class="row" style="flex:none;flex-wrap:nowrap;justify-content:flex-end"><button id="btnLog" class="ghost" type="button" aria-label="Logs para manutenção" title="Logs para manutenção">📖</button><button id="btnSettings" class="ghost" type="button">Ajustes</button></div>
       <span id="netPill" class="pill" hidden>Offline</span>
     </div>
   </header>
@@ -247,6 +247,20 @@ footer{color:var(--muted); font-size:13px; padding:8px 0 20px}
     Os episódios ficam salvos neste navegador e tocam sem internet. No iPhone, abra no Safari, toque em Compartilhar e em Adicionar à Tela de Início para o app também abrir offline.
   </footer>
 </div>
+
+<dialog id="dlgLog">
+  <h2>Logs para manutenção</h2>
+  <p class="hint" style="margin-top:0">Toque em Copiar tudo e cole na conversa com o Claude. A chave do Gemini nunca entra no relatório.</p>
+  <label class="check"><input type="checkbox" id="logFull"><span>Relatório completo (bem mais longo, só se o resumo não bastar)</span></label>
+  <textarea id="logText" readonly spellcheck="false" style="min-height:260px;font:12px/1.4 ui-monospace,Menlo,monospace;margin-top:10px"></textarea>
+  <div class="prog" id="progLog" hidden></div>
+  <div class="row" style="margin-top:12px">
+    <button id="btnLogCopy" class="primary" type="button" style="width:auto">Copiar tudo</button>
+    <button id="btnLogDl" type="button">Baixar .txt</button>
+    <button id="btnLogClear" type="button">Limpar logs</button>
+    <button id="btnLogClose" type="button">Fechar</button>
+  </div>
+</dialog>
 
 <dialog id="dlg">
   <h2>Ajustes</h2>
@@ -447,6 +461,63 @@ function wavToPcm(ab) {
 // </PURE>
 
 /* ============================================================
+   Logs avançados (botão 📖): guardam o que aconteceu, sem a chave
+   ============================================================ */
+const LOG = (() => {
+  const MAX = 1200, KEEP = 400;
+  const store = (() => { try { return window.localStorage; } catch (e) { return null; } })();
+  let session = 1;
+  try { session = (parseInt(store.getItem('logsess') || '0', 10) || 0) + 1; store.setItem('logsess', String(session)); } catch (e) { /* sem storage */ }
+  let buf = [];
+  try { buf = JSON.parse(store.getItem('applog') || '[]'); if (!Array.isArray(buf)) buf = []; } catch (e) { buf = []; }
+  let timer = null;
+  const secret = () => { try { return store.getItem('gk') || ''; } catch (e) { return ''; } };
+  const redact = (s) => {
+    s = String(s);
+    const k = secret();
+    if (k && k.length > 6) s = s.split(k).join('[CHAVE]');
+    return s.replace(/AIza[\w-]{20,}/g, '[CHAVE]').replace(/(key=)[^&\s"']+/gi, '$1[CHAVE]');
+  };
+  const fmt = (v) => {
+    if (v === undefined) return '';
+    if (v instanceof Error) return v.name + ': ' + v.message + (v.stack ? ' | ' + v.stack.split('\n').slice(0, 4).join(' < ') : '');
+    if (typeof v === 'string') return v;
+    try { return JSON.stringify(v); } catch (e) { return String(v); }
+  };
+  function save() {
+    timer = null;
+    try { store.setItem('applog', JSON.stringify(buf.slice(-KEEP))); }
+    catch (e) { try { store.removeItem('applog'); } catch (x) { /* ok */ } }
+  }
+  function add(level, tag, msg, data) {
+    let text = redact(fmt(msg) + (data !== undefined ? ' ' + fmt(data) : ''));
+    if (text.length > 1500) text = text.slice(0, 1500) + '…[+' + (text.length - 1500) + ']';
+    buf.push([Date.now(), session, level, tag, text]);
+    if (buf.length > MAX) buf.splice(0, buf.length - MAX);
+    if (!timer) timer = setTimeout(save, 700);
+  }
+  return {
+    d: (t, m, x) => add('D', t, m, x), i: (t, m, x) => add('I', t, m, x),
+    w: (t, m, x) => add('W', t, m, x), e: (t, m, x) => add('E', t, m, x),
+    all: () => buf, flush: save, fmt, redact, session,
+    clear() { buf = []; save(); }
+  };
+})();
+['log', 'info', 'warn', 'error', 'debug'].forEach((k) => {
+  const orig = console[k].bind(console);
+  console[k] = (...a) => {
+    try { LOG[k === 'error' ? 'e' : k === 'warn' ? 'w' : 'i']('console', a.map(LOG.fmt).join(' ')); } catch (e) { /* ok */ }
+    orig(...a);
+  };
+});
+window.addEventListener('error', (ev) => LOG.e('janela', (ev.message || 'erro') + ' @ ' + String(ev.filename || '').split('/').pop() + ':' + ev.lineno + ':' + ev.colno, ev.error));
+window.addEventListener('unhandledrejection', (ev) => LOG.e('promessa', ev.reason));
+window.addEventListener('securitypolicyviolation', (ev) => LOG.e('csp', ev.violatedDirective + ' bloqueou ' + ev.blockedURI));
+document.addEventListener('visibilitychange', () => LOG.i('app', 'visibilidade: ' + document.visibilityState));
+window.addEventListener('pagehide', () => { LOG.i('app', 'pagehide'); LOG.flush(); });
+LOG.i('app', 'página aberta (sessão s' + LOG.session + ')');
+
+/* ============================================================
    Estado e configurações
    ============================================================ */
 const $ = (s) => document.querySelector(s);
@@ -516,7 +587,7 @@ let cur = { id: null, url: null };
    ============================================================ */
 class Progress {
   constructor(el, onCancel) {
-    this.el = el;
+    this.el = el; this.name = el.id;
     el.innerHTML = '<div class="prog-top"><span class="prog-label"></span><span class="prog-pct">0%</span></div>' +
       '<div class="meter" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i></i></div>' +
       '<div class="prog-bottom"><span class="prog-note"></span><button type="button" class="link">Cancelar</button></div>';
@@ -535,6 +606,8 @@ class Progress {
     p = Math.max(0, Math.min(100, Math.round(p)));
     if (p < this.last && p !== 0) p = this.last;      // a barra nunca anda para trás
     this.last = p;
+    if (label !== undefined && label !== this.lab) { this.lab = label; LOG.d('barra', this.name + ' · ' + label + ' ' + p + '%'); }
+    else if (Math.floor(p / 20) !== this.stp) { this.stp = Math.floor(p / 20); LOG.d('barra', this.name + ' ' + p + '%' + (note ? ' · ' + note : '')); }
     this.fill.style.width = p + '%';
     this.pct.textContent = p + '%';
     this.meter.setAttribute('aria-valuenow', String(p));
@@ -605,27 +678,38 @@ async function countdown(sec, label, onWait, signal) {
 
 async function gem(path, body, { signal, onWait, tries = 5 } = {}) {
   let attempt = 0;
+  const name = path.split('?')[0];
+  const payload = JSON.stringify(body);
   for (;;) {
     let res;
+    const t0 = performance.now();
+    LOG.i('gem', 'POST ' + name + (attempt ? ' tentativa ' + (attempt + 1) : '') + ' | corpo ' + Math.round(payload.length / 1024) + ' KB');
     try {
       res = await fetch(API + path, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'x-goog-api-key': S.key },
-        body: JSON.stringify(body),
+        body: payload,
         signal
       });
     } catch (e) {
+      LOG.e('gem', 'falha de rede, CORS ou cancelamento após ' + Math.round(performance.now() - t0) + ' ms', e);
       if (e.name === 'AbortError') throw e;
       throw new Error('Sem conexão com o Gemini. Verifique sua internet e tente de novo.');
     }
-    if (res.ok) return res;
-    const err = readApiError(res.status, await res.text());
+    const ms = Math.round(performance.now() - t0);
+    if (res.ok) { LOG.i('gem', 'HTTP ' + res.status + ' em ' + ms + ' ms (cabeçalhos recebidos)'); return res; }
+    const raw = await res.text();
+    const err = readApiError(res.status, raw);
+    LOG.w('gem', 'HTTP ' + res.status + ' em ' + ms + ' ms', raw.slice(0, 700));
     const transient = res.status === 429 || res.status === 500 || res.status === 503;
     if (transient && attempt < tries && !err.daily) {
       attempt++;
       if (res.status === 429) {
-        await countdown(Math.min(Math.max(err.retry || 20, 5), 75), 'Limite gratuito do Gemini, retomando em', onWait, signal);
+        const w = Math.min(Math.max(err.retry || 20, 5), 75);
+        LOG.i('gem', 'limite: esperando ' + w + ' s');
+        await countdown(w, 'Limite gratuito do Gemini, retomando em', onWait, signal);
       } else {
+        LOG.i('gem', 'servidor ocupado: esperando ' + 4 * attempt + ' s');
         await countdown(4 * attempt, 'Gemini ocupado, nova tentativa em', onWait, signal);
       }
       continue;
@@ -671,6 +755,7 @@ async function generateScript(opts, signal, onProgress) {
 
   let pct = 0, first = false, waitMsg = '';
   const t0 = Date.now();
+  LOG.i('roteiro', 'início', { modo: opts.mode, tom: opts.tone, comVideo: !!opts.withVideo, tamanho: String(opts.lenText || '').slice(0, 70), modelo: S.textModel, video: opts.url || '' });
   const label = opts.withVideo ? 'Entendendo o vídeo' : 'Reescrevendo o roteiro';
   const tick = setInterval(() => {
     if (first) return;
@@ -679,7 +764,7 @@ async function generateScript(opts, signal, onProgress) {
     onProgress(pct, waitMsg || (opts.withVideo ? 'O Gemini está assistindo ao vídeo…' : 'Pensando no novo texto…'), label);
   }, 400);
 
-  let text = '';
+  let text = '', lastUsage = null;
   try {
     onProgress(0, 'Enviando para o Gemini…', label);
     const res = await gem('/models/' + S.textModel + ':streamGenerateContent?alt=sse', body, {
@@ -702,6 +787,9 @@ async function generateScript(opts, signal, onProgress) {
       }
       const ps = (o.candidates && o.candidates[0] && o.candidates[0].content && o.candidates[0].content.parts) || [];
       for (const p of ps) if (p.text && !p.thought) text += p.text;
+      const fr = o.candidates && o.candidates[0] && o.candidates[0].finishReason;
+      if (fr && fr !== 'STOP') LOG.w('roteiro', 'finishReason=' + fr);
+      if (o.usageMetadata) lastUsage = o.usageMetadata;
     };
     for (;;) {
       const { value, done } = await reader.read();
@@ -710,6 +798,7 @@ async function generateScript(opts, signal, onProgress) {
       let i;
       while ((i = buf.indexOf('\n')) >= 0) { eat(buf.slice(0, i)); buf = buf.slice(i + 1); }
       if (text) {
+        if (!first) LOG.i('roteiro', 'primeiro texto após ' + (Date.now() - t0) + ' ms');
         first = true;
         pct = 12 + 86 * Math.min(1, text.length / expectChars);
         onProgress(pct, 'Escrevendo o roteiro… ' + wordCount(text) + ' palavras', label);
@@ -721,6 +810,8 @@ async function generateScript(opts, signal, onProgress) {
   }
 
   const out = parseScript(text);
+  LOG.i('roteiro', 'fim em ' + (Date.now() - t0) + ' ms: ' + wordCount(out.script) + ' palavras, título="' + out.title + '"', lastUsage || undefined);
+  if (wordCount(out.script) < 30) LOG.e('roteiro', 'texto curto demais; bruto=' + text.slice(0, 300));
   if (wordCount(out.script) < 30) {
     throw new Error('O Gemini não devolveu um roteiro. O vídeo pode estar privado, com restrição de idade ou sem acesso. Tente outro vídeo.');
   }
@@ -744,7 +835,8 @@ async function ttsChunk(text, signal, onWait) {
     const j = await res.json();
     const parts = (j.candidates && j.candidates[0] && j.candidates[0].content && j.candidates[0].content.parts) || [];
     const p = parts.find((x) => x.inlineData && x.inlineData.data);
-    if (p) return { pcm: b64ToBytes(p.inlineData.data), rate: parseRate(p.inlineData.mimeType) };
+    if (p) { LOG.i('tts', 'áudio recebido: ' + Math.round(p.inlineData.data.length * 0.75 / 1024) + ' KB, ' + p.inlineData.mimeType); return { pcm: b64ToBytes(p.inlineData.data), rate: parseRate(p.inlineData.mimeType) }; }
+    LOG.w('tts', 'resposta sem áudio (tentativa ' + (t + 1) + ')', JSON.stringify(j).slice(0, 400));
     await sleep(2000, signal);
   }
   throw new Error('A voz não devolveu áudio para um trecho. Toque em gerar de novo: o que já ficou pronto é reaproveitado.');
@@ -759,22 +851,33 @@ async function loadPiper() {
     'https://cdn.jsdelivr.net/npm/@mintplex-labs/piper-tts-web@1.0.4/+esm'
   ];
   for (const u of urls) {
-    try { piperMod = await import(u); return piperMod; } catch (e) { /* tenta o próximo endereço */ }
+    const t0 = performance.now();
+    try { piperMod = await import(u); LOG.i('piper', 'motor carregado de ' + u + ' em ' + Math.round(performance.now() - t0) + ' ms', Object.keys(piperMod)); return piperMod; }
+    catch (e) { LOG.e('piper', 'falha ao carregar ' + u + ' após ' + Math.round(performance.now() - t0) + ' ms', e); }
   }
   throw new Error('Não consegui carregar o motor de voz offline. Conecte à internet na primeira vez (depois ele fica guardado) ou troque para a voz do Gemini.');
 }
 async function preparePiper(voiceId, onProgress) {
   const tts = await loadPiper();
   let stored = [];
-  try { stored = await tts.stored(); } catch (e) { /* sem OPFS: o cache do app cuida */ }
+  try { stored = await tts.stored(); LOG.i('piper', 'vozes guardadas', stored); } catch (e) { LOG.w('piper', 'stored() falhou (OPFS?)', e); }
   if (stored.includes(voiceId)) return false;
+  LOG.i('piper', 'baixando a voz ' + voiceId);
+  const tDl = performance.now();
+  let dlStep = -1;
   try {
     await tts.download(voiceId, (p) => {
-      if (p && p.total) onProgress(p.loaded * 100 / p.total, 'Baixando a voz (só na primeira vez, cerca de 60 MB)');
+      if (p && p.total) {
+        const pc = p.loaded * 100 / p.total;
+        if (Math.floor(pc / 25) !== dlStep) { dlStep = Math.floor(pc / 25); LOG.d('piper', 'download ' + Math.round(pc) + '% de ' + String(p.url || '').split('/').pop() + ' (' + fmtBytes(p.loaded) + ' de ' + fmtBytes(p.total) + ')'); }
+        onProgress(pc, 'Baixando a voz (só na primeira vez, cerca de 60 MB)');
+      }
     });
   } catch (e) {
+    LOG.e('piper', 'download falhou após ' + Math.round(performance.now() - tDl) + ' ms', e);
     throw new Error('Não consegui baixar a voz ' + voiceId + '. Verifique a internet ou escolha outra voz.');
   }
+  LOG.i('piper', 'voz baixada em ' + Math.round(performance.now() - tDl) + ' ms');
   return true;
 }
 async function piperSynth(text, voiceId) {
@@ -782,24 +885,29 @@ async function piperSynth(text, voiceId) {
   if (tts.TtsSession) {
     try {
       if (!piperSession || piperSessionVoice !== voiceId) {
-        piperSession = new tts.TtsSession({ voiceId, progress: () => {}, logger: () => {} });
+        LOG.i('piper', 'criando sessão para ' + voiceId);
+        piperSession = new tts.TtsSession({ voiceId, progress: () => {}, logger: (m) => LOG.d('piper-lib', m) });
         piperSessionVoice = voiceId;
       }
       return await piperSession.predict(text);
-    } catch (e) { piperSession = null; /* cai para o modo simples abaixo */ }
+    } catch (e) { LOG.w('piper', 'sessão falhou, usando predict simples', e); piperSession = null; }
   }
   return await tts.predict({ text, voiceId });
 }
 async function piperChunk(text, signal) {
   if (signal && signal.aborted) throw new DOMException('Cancelado', 'AbortError');
   const res = await piperSynth(text.replace(/\s*\n+\s*/g, ' '), S.pvoice);
-  return wavToPcm(res instanceof Blob ? await res.arrayBuffer() : res);
+  const ab = res instanceof Blob ? await res.arrayBuffer() : res;
+  const out = wavToPcm(ab);
+  LOG.d('piper', 'WAV recebido: ' + fmtBytes(ab.byteLength) + ', ' + out.rate + ' Hz, ' + (out.pcm.length / 2 / out.rate).toFixed(1) + ' s');
+  return out;
 }
 
 async function makeAudio(script, signal, onProgress) {
   const piper = S.engine === 'piper';
   const chunks = chunkScript(script, piper ? 420 : 2000);
   const n = chunks.length;
+  LOG.i('audio', 'início: motor=' + S.engine + ' voz=' + voiceName() + ' trechos=' + n + ' caracteres=' + script.length + ' (retomando de ' + (partial.key === (S.engine + '|' + (piper ? S.pvoice : S.ttsModel + '|' + S.voice) + '|' + script) ? partial.pcm.length : 0) + ')');
   const key = S.engine + '|' + (piper ? S.pvoice : S.ttsModel + '|' + S.voice) + '|' + script;
   if (partial.key !== key) partial = { key, pcm: [], rate: 24000 };
   let base = 0;
@@ -822,10 +930,12 @@ async function makeAudio(script, signal, onProgress) {
       const r = piper ? await piperChunk(chunks[i], signal) : await ttsChunk(chunks[i], signal, (m) => { waiting = m; });
       partial.pcm.push(r.pcm);
       partial.rate = r.rate;
+      LOG.i('audio', 'trecho ' + (i + 1) + '/' + n + ' pronto em ' + (Date.now() - t0) + ' ms (' + chunks[i].length + ' car → ' + (r.pcm.length / 2 / r.rate).toFixed(1) + ' s de áudio)');
     } finally { clearInterval(tick); }
     onProgress(base + span * (i + 1) / n, 'Trecho ' + (i + 1) + ' de ' + n + ' pronto', label);
   }
   const wav = buildWav(partial.pcm, partial.rate, piper ? 0.18 : 0.35);
+  LOG.i('audio', 'WAV final: ' + wav.duration.toFixed(1) + ' s, ' + fmtBytes(wav.bytes));
   partial = { key: '', pcm: [], rate: 24000 };
   return wav;
 }
@@ -900,8 +1010,10 @@ async function saveEpisode(meta, wav) {
     await DB.put('eps', Object.assign({ id, createdAt: Date.now(), duration: wav.duration, bytes: wav.bytes }, meta));
   } catch (e) {
     try { await DB.del('audio', id); } catch (x) { /* ok */ }
+    LOG.e('salvar', e);
     throw new Error('Não deu para salvar offline (armazenamento do navegador cheio ou bloqueado). O áudio foi gerado, mas não ficou salvo.');
   }
+  LOG.i('salvar', id + ' salvo: ' + fmtBytes(wav.bytes));
   return id;
 }
 
@@ -937,6 +1049,7 @@ const SPEEDS = [1, 1.25, 1.5, 1.75, 2, 0.75];
 async function openEpisode(id, autoplay) {
   const meta = eps.find((e) => e.id === id);
   if (!meta) return;
+  LOG.i('player', 'abrindo ' + id);
   $('#playerCard').hidden = false;
   $('#pTitle').textContent = meta.title || 'Episódio';
   $('#pMeta').textContent = fmtTime(meta.duration) + ' · ' + fmtBytes(meta.bytes) + ' · salvo para ouvir offline';
@@ -961,6 +1074,7 @@ async function openEpisode(id, autoplay) {
     if (autoplay) { try { await audio.play(); } catch (e) { /* o iOS pode exigir toque no ▶ */ } }
   } catch (e) {
     pLoad.hide();
+    LOG.e('player', e);
     banner(e.message, 'err');
   }
 }
@@ -977,6 +1091,7 @@ audio.addEventListener('timeupdate', updateSeek);
 audio.addEventListener('loadedmetadata', updateSeek);
 audio.addEventListener('play', () => { $('#btnPlay').textContent = '❚❚'; $('#btnPlay').setAttribute('aria-label', 'Pausar'); });
 audio.addEventListener('pause', () => { $('#btnPlay').textContent = '▶'; $('#btnPlay').setAttribute('aria-label', 'Tocar'); });
+audio.addEventListener('error', () => LOG.e('player', 'erro no <audio>: código ' + (audio.error && audio.error.code) + ' ' + (audio.error && audio.error.message)));
 audio.addEventListener('ended', () => { $('#btnPlay').textContent = '▶'; });
 $('#btnPlay').addEventListener('click', () => { if (!audio.src) return; audio.paused ? audio.play() : audio.pause(); });
 $('#btnBack').addEventListener('click', () => { audio.currentTime = Math.max(0, audio.currentTime - 15); });
@@ -1053,12 +1168,14 @@ function needKey() {
 }
 function failure(e, ...bars) {
   bars.forEach((b) => b.hide());
+  if (e && e.name === 'AbortError') LOG.i('falha', 'cancelado pelo usuário'); else LOG.e('falha', e);
   if (e && e.name === 'AbortError') banner('Cancelado.', 'info');
   else banner((e && e.message) || 'Algo deu errado.', 'err');
 }
 
 async function runQuick() {
   banner('');
+  LOG.i('ação', 'modo rápido', { video: $('#url').value, motor: S.engine, voz: voiceName() });
   const url = currentVideo(); if (!url || !needKey()) return;
   lock(true); ctl = new AbortController();
   const signal = ctl.signal;
@@ -1098,6 +1215,7 @@ function updateStats() {
 
 async function runScript() {
   banner('');
+  LOG.i('ação', 'gerar roteiro (avançado)', { tom: $('#tone').value, minutos: $('#mins').value });
   const url = currentVideo(); if (!url || !needKey()) return;
   lock(true); ctl = new AbortController();
   try {
@@ -1117,6 +1235,7 @@ async function runScript() {
 
 async function runRevise({ instruction, tone, words }) {
   banner('');
+  LOG.i('ação', 'reescrever roteiro', { tom: tone, palavras: words || null, pedido: String(instruction || '').slice(0, 120) });
   const prev = $('#script').value.trim();
   if (wordCount(prev) < 20) { banner('Gere ou escreva um roteiro antes de pedir ajustes.', 'err'); return; }
   if (!instruction) { banner('Escreva seu pedido no campo “Dê seu pitaco”.', 'err'); $('#instr').focus(); return; }
@@ -1143,6 +1262,7 @@ async function runRevise({ instruction, tone, words }) {
 
 async function runAudio() {
   banner('');
+  LOG.i('ação', 'gerar áudio (avançado)', { motor: S.engine, voz: voiceName() });
   const script = sanitizeScript($('#script').value);
   if (wordCount(script) < 20) { banner('O roteiro está vazio ou muito curto.', 'err'); return; }
   if (S.engine === 'gemini' && !needKey()) return;
@@ -1208,8 +1328,10 @@ async function detectModels() {
     if (tts.length && !tts.includes(curTts)) $('#ttsModel').value = pickBest(tts, /flash/);
     pModels.set(100, 'Texto: ' + $('#textModel').value + ' · Voz: ' + $('#ttsModel').value);
     LS.set('detected', '1');
+    LOG.i('modelos', 'detectados: ' + txt.length + ' de texto, ' + tts.length + ' de voz; escolhidos ' + $('#textModel').value + ' / ' + $('#ttsModel').value);
     return true;
   } catch (e) {
+    LOG.e('modelos', e);
     pModels.hide();
     banner(e.message === 'Failed to fetch' ? 'Sem conexão para detectar os modelos.' : e.message, 'err');
     return false;
@@ -1307,6 +1429,7 @@ $('#url').addEventListener('input', onUrlInput);
 
 function netState() {
   const off = !navigator.onLine;
+  LOG.i('rede', off ? 'offline' : 'online');
   const pill = $('#netPill');
   pill.hidden = !off;
   pill.className = 'pill off';
@@ -1317,13 +1440,154 @@ window.addEventListener('online', () => { netState(); banner(''); });
 window.addEventListener('offline', netState);
 window.addEventListener('unhandledrejection', (e) => { banner((e.reason && e.reason.message) || 'Algo deu errado.', 'err'); });
 
+/* ============================================================
+   Relatório de manutenção (botão 📖)
+   ============================================================ */
+const pLog = new Progress($('#progLog'), null);
+async function buildReport(full, prog) {
+  const L = [];
+  const step = (p, note) => prog && prog(p, note);
+  const safe = async (nome, fn) => { try { await fn(); } catch (e) { L.push(nome + ': erro ao coletar: ' + LOG.fmt(e)); } };
+  const tf = (t) => new Date(t).toTimeString().slice(0, 8) + '.' + String(new Date(t).getMilliseconds()).padStart(3, '0');
+  const cap = full ? 1500 : 260;
+
+  L.push('=== PODCAST DO VÍDEO · RELATÓRIO DE MANUTENÇÃO (app v3) ===');
+  L.push('gerado=' + new Date().toISOString() + ' sessão=s' + LOG.session + ' modo=' + (full ? 'completo' : 'resumo'));
+
+  step(8, 'Ambiente…');
+  L.push('--- AMBIENTE ---');
+  await safe('ambiente', async () => {
+    const n = navigator;
+    L.push('UA: ' + n.userAgent);
+    L.push('online=' + n.onLine + ' tela=' + screen.width + 'x' + screen.height + ' dpr=' + devicePixelRatio +
+      ' standalone=' + (n.standalone === true || matchMedia('(display-mode: standalone)').matches) +
+      ' memGB=' + (n.deviceMemory || '?') + ' núcleos=' + (n.hardwareConcurrency || '?'));
+    L.push('crossOriginIsolated=' + !!self.crossOriginIsolated + ' WebAssembly=' + (typeof WebAssembly !== 'undefined') +
+      ' WebGPU=' + !!n.gpu + ' OPFS=' + !!(n.storage && n.storage.getDirectory) + ' IndexedDB=' + !!window.indexedDB +
+      ' SW=' + ('serviceWorker' in n) + ' speech=' + ('speechSynthesis' in window));
+    L.push('origem=' + location.origin + location.pathname);
+  });
+
+  step(20, 'Configurações…');
+  L.push('--- CONFIG E ESTADO ---');
+  await safe('config', async () => {
+    L.push('motor=' + S.engine + ' vozPiper=' + S.pvoice + ' vozGemini=' + S.voice + ' modeloTexto=' + S.textModel + ' modeloVoz=' + S.ttsModel);
+    L.push('chave: ' + (S.key ? 'presente, ' + S.key.length + ' caracteres, formato AIza=' + /^AIza/.test(S.key) : 'AUSENTE'));
+    L.push('aba=' + ($('#panelQuick').hidden ? 'avançado' : 'rápido') + ' videoId=' + (ytId($('#url').value) || 'inválido/vazio') +
+      ' ocupado=' + busy + ' trechosProntosParaRetomar=' + partial.pcm.length);
+    L.push('barras: ' + [['rápido', pQuick], ['roteiro', pScript], ['reescrita', pRevise], ['áudio', pAudio]].map(([k, b]) => k + '=' + b.last + '%' + (b.el.hidden ? '(oculta)' : '')).join(' '));
+    L.push('roteiro: ' + wordCount($('#script').value) + ' palavras; áudio: src=' + !!audio.src + ' readyState=' + audio.readyState + ' dur=' + (isFinite(audio.duration) ? audio.duration.toFixed(1) : '?') + ' erro=' + (audio.error ? audio.error.code : 'nenhum'));
+  });
+
+  step(40, 'Armazenamento e cache…');
+  L.push('--- ARMAZENAMENTO / CACHE / SERVICE WORKER ---');
+  await safe('armazenamento', async () => {
+    if (navigator.storage && navigator.storage.estimate) {
+      const e = await navigator.storage.estimate();
+      const persisted = navigator.storage.persisted ? await navigator.storage.persisted() : '?';
+      L.push('uso=' + fmtBytes(e.usage || 0) + ' cota=' + fmtBytes(e.quota || 0) + ' persistente=' + persisted);
+    }
+  });
+  await safe('sw', async () => {
+    const reg = await navigator.serviceWorker.getRegistration();
+    L.push('sw: registrado=' + !!reg + ' ativo=' + !!(reg && reg.active) + ' controlando=' + !!navigator.serviceWorker.controller + (reg && reg.active ? ' estado=' + reg.active.state : ''));
+    for (const k of await caches.keys()) { const c = await caches.open(k); L.push('cache ' + k + ': ' + (await c.keys()).length + ' itens'); }
+  });
+
+  step(60, 'Motor de voz…');
+  L.push('--- PIPER ---');
+  await safe('piper', async () => {
+    L.push('módulo carregado=' + !!piperMod + ' sessão=' + (piperSession ? piperSessionVoice : 'nenhuma'));
+    if (piperMod) L.push('vozes guardadas: ' + JSON.stringify(await piperMod.stored()));
+    const v = ('speechSynthesis' in window) ? speechSynthesis.getVoices().filter((x) => /^pt/i.test(x.lang)).map((x) => x.name + '(' + x.lang + ')') : [];
+    L.push('vozes do aparelho pt: ' + (v.join(', ') || 'nenhuma'));
+  });
+
+  step(75, 'Episódios…');
+  L.push('--- EPISÓDIOS (' + eps.length + ') ---');
+  eps.slice(0, full ? 50 : 8).forEach((e) => L.push(e.id + ' "' + (e.title || '') + '" ' + fmtTime(e.duration) + ' ' + fmtBytes(e.bytes) + ' voz=' + (e.voice || '?') + ' roteiro=' + wordCount(e.script) + ' palavras'));
+
+  step(88, 'Linha do tempo…');
+  const all = LOG.all();
+  const lines = (arr) => {
+    const out = []; let prev = '', cnt = 0;
+    const flush = () => { if (cnt > 1) out[out.length - 1] += '  (×' + cnt + ')'; };
+    arr.forEach(([t, s, lv, tag, txt]) => {
+      const body = txt.length > cap ? txt.slice(0, cap) + '…' : txt;
+      const line = 's' + s + ' ' + tf(t) + ' ' + lv + ' ' + tag + ' ' + body;
+      const sig = lv + tag + body;
+      if (sig === prev) { cnt++; return; }
+      flush(); prev = sig; cnt = 1; out.push(line);
+    });
+    flush();
+    return out;
+  };
+  const bad = all.filter((x) => x[2] === 'E' || x[2] === 'W');
+  L.push('--- ERROS E AVISOS (' + bad.length + ' no total' + (full ? '' : ', últimos 20') + ') ---');
+  L.push(...lines(full ? bad : bad.slice(-20)));
+  const tl = full ? all : all.slice(-140);
+  L.push('--- LINHA DO TEMPO (' + tl.length + ' de ' + all.length + ' registros) ---');
+  L.push(...lines(tl));
+  L.push('=== FIM ===');
+  let text = LOG.redact(L.join('\n'));
+  if (!full && text.length > 16000) text = text.slice(0, 3000) + '\n…[cortado para ficar curto; marque "completo" se precisar]…\n' + text.slice(-12500);
+  step(100, 'Pronto');
+  return text;
+}
+
+async function copyText(t) {
+  try { await navigator.clipboard.writeText(t); return true; } catch (e) { /* tenta o método antigo */ }
+  try {
+    const ta = $('#logText');
+    ta.removeAttribute('readonly'); ta.focus(); ta.select(); ta.setSelectionRange(0, t.length);
+    const ok = document.execCommand('copy');
+    ta.setAttribute('readonly', ''); ta.blur();
+    return ok;
+  } catch (e) { return false; }
+}
+async function refreshReport() {
+  const ta = $('#logText');
+  pLog.show('Juntando os logs');
+  ta.value = '';
+  ta.value = await buildReport($('#logFull').checked, (p, n) => pLog.set(p, n));
+  setTimeout(() => pLog.hide(), 500);
+  $('#btnLogCopy').textContent = 'Copiar tudo (' + ta.value.length.toLocaleString('pt-BR') + ' caracteres)';
+}
+$('#btnLog').addEventListener('click', async () => {
+  LOG.i('app', 'relatório aberto');
+  const d = $('#dlgLog');
+  if (d.showModal) d.showModal(); else d.setAttribute('open', '');
+  await refreshReport();
+});
+$('#logFull').addEventListener('change', refreshReport);
+$('#btnLogCopy').addEventListener('click', async () => {
+  const ok = await copyText($('#logText').value);
+  const b = $('#btnLogCopy');
+  b.textContent = ok ? 'Copiado! Cole na conversa' : 'Não deu para copiar: segure no texto e use Selecionar tudo';
+  setTimeout(() => { b.textContent = 'Copiar tudo (' + $('#logText').value.length.toLocaleString('pt-BR') + ' caracteres)'; }, 3500);
+});
+$('#btnLogDl').addEventListener('click', () => {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([$('#logText').value], { type: 'text/plain;charset=utf-8' }));
+  a.download = 'podcast-logs-' + new Date().toISOString().slice(0, 16).replace(/[:T]/g, '-') + '.txt';
+  document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 4000);
+});
+$('#btnLogClear').addEventListener('click', async () => { LOG.clear(); LOG.i('app', 'logs limpos'); await refreshReport(); });
+$('#btnLogClose').addEventListener('click', () => { const d = $('#dlgLog'); d.close ? d.close() : d.removeAttribute('open'); });
+
 (async function init() {
+  LOG.i('app', 'init: motor=' + S.engine + ' chave=' + (S.key ? 'sim' : 'não') + ' online=' + navigator.onLine);
   netState();
   syncEngine();
   await loadLibrary();
   try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) { /* ok */ }
   if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
-    try { await navigator.serviceWorker.register('sw.js'); } catch (e) { /* sem offline do app, o áudio continua salvo */ }
+    try {
+      const reg = await navigator.serviceWorker.register('sw.js');
+      LOG.i('sw', reg ? 'registrado, escopo ' + reg.scope : 'registro não devolveu nada');
+      navigator.serviceWorker.addEventListener('controllerchange', () => LOG.i('sw', 'novo controlador assumiu'));
+    } catch (e) { LOG.e('sw', 'registro falhou (sem offline do app; o áudio continua salvo)', e); }
   }
   if (!S.key) banner('Para começar, abra Ajustes e cole sua chave do Gemini (grátis).', 'info');
 })();

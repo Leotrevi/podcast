@@ -1,6 +1,6 @@
 // Service worker: guarda a página e as bibliotecas/voz baixadas, para tudo abrir sem internet.
 // Os áudios gerados ficam no IndexedDB (gerenciado pela própria página).
-const CACHE = 'podcast-do-video-v2';   // a página
+const CACHE = 'podcast-do-video-v3';   // a página
 const LIBS = 'podcast-do-video-libs-v1'; // motor de voz (Piper), WebAssembly e modelo da voz
 const KEEP = [CACHE, LIBS];
 const SHELL = ['./', './index.html'];
