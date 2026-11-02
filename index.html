@@ -714,7 +714,43 @@ async function gem(path, body, { signal, onWait, tries = 5 } = {}) {
       }
       continue;
     }
-    throw new Error(friendly(err));
+    const ex = new Error(friendly(err));
+    ex.status = res.status; ex.apiMsg = err.msg;
+    throw ex;
+  }
+}
+
+/* Se o modelo foi desativado (404), troca sozinho pelo sugerido pelo Google ou pelo mais novo da lista */
+async function recoverModel(kind, failed, apiMsg) {
+  let cand = (/models\/([\w.\-]+)/.exec(String(apiMsg || '').replace('models/' + failed, '')) || [])[1];
+  if (cand && (kind === 'tts') !== /tts/.test(cand)) cand = null;
+  if (!cand) {
+    try {
+      const res = await fetch(API + '/models?pageSize=1000', { headers: { 'x-goog-api-key': S.key } });
+      if (res.ok) {
+        const j = await res.json();
+        const names = (j.models || []).filter((m) => (m.supportedGenerationMethods || []).includes('generateContent'))
+          .map((m) => m.name.replace(/^models\//, '')).filter((n) => n !== failed);
+        const list = kind === 'tts'
+          ? names.filter((n) => /tts/.test(n))
+          : names.filter((n) => /^gemini-/.test(n) && !/tts|image|embedding|live|audio|robotics|computer|lite|native|vision|learnlm|thinking|exp/.test(n));
+        cand = pickBest(list, /flash/);
+      }
+    } catch (e) { LOG.e('modelos', 'não consegui listar modelos', e); }
+  }
+  if (!cand) return '';
+  if (kind === 'tts') { S.ttsModel = cand; LS.set('ttsModel', cand); } else { S.textModel = cand; LS.set('textModel', cand); }
+  LOG.w('modelos', 'modelo ' + failed + ' indisponível; trocado automaticamente por ' + cand);
+  return cand;
+}
+async function gemModelRetry(kind, pathFor, body, o) {
+  const cur = kind === 'tts' ? S.ttsModel : S.textModel;
+  try { return await gem(pathFor(cur), body, o); }
+  catch (e) {
+    if (e.status !== 404) throw e;
+    const next = await recoverModel(kind, cur, e.apiMsg);
+    if (!next) throw e;
+    return await gem(pathFor(next), body, o);
   }
 }
 
@@ -767,7 +803,7 @@ async function generateScript(opts, signal, onProgress) {
   let text = '', lastUsage = null;
   try {
     onProgress(0, 'Enviando para o Gemini…', label);
-    const res = await gem('/models/' + S.textModel + ':streamGenerateContent?alt=sse', body, {
+    const res = await gemModelRetry('text', (m) => '/models/' + m + ':streamGenerateContent?alt=sse', body, {
       signal, onWait: (m) => { waitMsg = m; if (m) onProgress(pct, m, label); }
     });
     waitMsg = '';
@@ -831,7 +867,7 @@ async function ttsChunk(text, signal, onWait) {
     }
   };
   for (let t = 0; t < 3; t++) {
-    const res = await gem('/models/' + S.ttsModel + ':generateContent', body, { signal, onWait });
+    const res = await gemModelRetry('tts', (m) => '/models/' + m + ':generateContent', body, { signal, onWait });
     const j = await res.json();
     const parts = (j.candidates && j.candidates[0] && j.candidates[0].content && j.candidates[0].content.parts) || [];
     const p = parts.find((x) => x.inlineData && x.inlineData.data);
@@ -1324,8 +1360,8 @@ async function detectModels() {
     $('#dlText').innerHTML = txt.map((n) => '<option value="' + esc(n) + '">').join('');
     $('#dlTts').innerHTML = tts.map((n) => '<option value="' + esc(n) + '">').join('');
     const curText = $('#textModel').value.trim(), curTts = $('#ttsModel').value.trim();
-    if (txt.length && !txt.includes(curText)) $('#textModel').value = pickBest(txt, /flash/);
-    if (tts.length && !tts.includes(curTts)) $('#ttsModel').value = pickBest(tts, /flash/);
+    if (txt.length) $('#textModel').value = pickBest(txt, /flash/);
+    if (tts.length) $('#ttsModel').value = pickBest(tts, /flash/);
     pModels.set(100, 'Texto: ' + $('#textModel').value + ' · Voz: ' + $('#ttsModel').value);
     LS.set('detected', '1');
     LOG.i('modelos', 'detectados: ' + txt.length + ' de texto, ' + tts.length + ' de voz; escolhidos ' + $('#textModel').value + ' / ' + $('#ttsModel').value);
