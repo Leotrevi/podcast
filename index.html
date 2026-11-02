@@ -464,12 +464,23 @@ function wavToPcm(ab) {
   } else throw new Error('Formato de áudio da voz não suportado.');
   return { pcm: new Uint8Array(out.buffer), rate: fmt.rate };
 }
+// Ordena os modelos do Gemini do melhor para o pior candidato. Fora: geração de vídeo/imagem (omni), live etc.
+function rankModels(kind, names) {
+  const bad = kind === 'tts'
+    ? /image|embedding|live|robotics|computer|native|vision|learnlm|exp|omni|veo|imagen/
+    : /tts|image|embedding|live|audio|robotics|computer|native|vision|learnlm|exp|omni|veo|imagen|thinking|gemma/;
+  const ver = (n) => { const m = /gemini-(\d+)(?:\.(\d+))?/.exec(n); return m ? (+m[1]) * 100 + (+(m[2] || 0)) : -1; };
+  const tier = (n) => (/pro/.test(n) ? 2 : /lite/.test(n) ? 1 : 0);
+  return names
+    .filter((n) => /^gemini-\d/.test(n) && (kind !== 'tts' || /tts/.test(n)) && !bad.test(n))
+    .sort((a, b) => (/preview/.test(a) - /preview/.test(b)) || (tier(a) - tier(b)) || (ver(b) - ver(a)) || a.localeCompare(b));
+}
 // </PURE>
 
 /* ============================================================
    Logs avançados (botão 📖): guardam o que aconteceu, sem a chave
    ============================================================ */
-const APP_VERSION = 'v4';
+const APP_VERSION = 'v5';
 const LOG = (() => {
   const MAX = 1200, KEEP = 400;
   const store = (() => { try { return window.localStorage; } catch (e) { return null; } })();
@@ -535,8 +546,8 @@ const LS = {
 const API = 'https://generativelanguage.googleapis.com/v1beta';
 const S = {
   key: LS.get('gk', ''),
-  textModel: LS.get('textModel', 'gemini-2.5-flash'),
-  ttsModel: LS.get('ttsModel', 'gemini-2.5-flash-preview-tts'),
+  textModel: LS.get('textModel', 'gemini-3.8-flash'),
+  ttsModel: LS.get('ttsModel', 'gemini-3.8-flash-tts'),
   voice: LS.get('voice', 'Charon'),
   engine: LS.get('engine', 'piper'),
   pvoice: LS.get('pvoice', 'pt_BR-faber-medium')
@@ -547,6 +558,9 @@ const PIPER_VOICES = [
   ['pt_BR-jeff-medium', 'Jeff, masculina'],
   ['pt_BR-edresson-low', 'Edresson, masculina (mais leve e rápida)']
 ];
+// Migração: modelos antigos ou errados guardados por versões anteriores do app
+if (/omni|tts|^gemini-[12]\./.test(S.textModel)) { S.textModel = 'gemini-3.8-flash'; LS.set('textModel', S.textModel); }
+if (!/tts/.test(S.ttsModel) || /omni|^gemini-[12]\./.test(S.ttsModel)) { S.ttsModel = 'gemini-3.8-flash-tts'; LS.set('ttsModel', S.ttsModel); }
 function voiceName() { return S.engine === 'piper' ? S.pvoice : S.voice; }
 
 const VOICES = [
@@ -735,43 +749,52 @@ async function gem(path, body, { signal, onWait, tries = 5 } = {}) {
       continue;
     }
     const ex = new Error(friendly(err));
-    ex.status = res.status; ex.apiMsg = err.msg;
+    ex.status = res.status; ex.apiMsg = err.msg; ex.daily = err.daily;
     throw ex;
   }
 }
 
-/* Se o modelo foi desativado (404), troca sozinho pelo sugerido pelo Google ou pelo mais novo da lista */
-async function recoverModel(kind, failed, apiMsg) {
-  let cand = (/models\/([\w.\-]+)/.exec(String(apiMsg || '').replace('models/' + failed, '')) || [])[1];
-  if (cand && (kind === 'tts') !== /tts/.test(cand)) cand = null;
-  if (!cand) {
+/* Se o modelo não existe (404) ou não está liberado no plano gratuito (429 com limite 0),
+   o app tenta sozinho o próximo da lista, do melhor para o pior, e guarda o que funcionar. */
+const modelCache = {};
+async function nextModel(kind, tried, apiMsg) {
+  const sug = (/models\/([\w.\-]+)/.exec(String(apiMsg || '').replace('models/' + tried[tried.length - 1], '')) || [])[1];
+  if (sug && /^gemini-\d/.test(sug) && !tried.includes(sug) && (kind === 'tts') === /tts/.test(sug) && !/omni/.test(sug)) return sug;
+  if (!modelCache[kind]) {
     try {
       const res = await fetch(API + '/models?pageSize=1000', { headers: { 'x-goog-api-key': S.key } });
       if (res.ok) {
         const j = await res.json();
-        const names = (j.models || []).filter((m) => (m.supportedGenerationMethods || []).includes('generateContent'))
-          .map((m) => m.name.replace(/^models\//, '')).filter((n) => n !== failed);
-        const list = kind === 'tts'
-          ? names.filter((n) => /tts/.test(n))
-          : names.filter((n) => /^gemini-/.test(n) && !/tts|image|embedding|live|audio|robotics|computer|lite|native|vision|learnlm|thinking|exp/.test(n));
-        cand = pickBest(list, /flash/);
+        const names = (j.models || []).filter((m) => (m.supportedGenerationMethods || []).includes('generateContent')).map((m) => m.name.replace(/^models\//, ''));
+        modelCache[kind] = rankModels(kind, names);
+        LOG.i('modelos', 'candidatos (' + kind + '): ' + modelCache[kind].join(', '));
       }
     } catch (e) { LOG.e('modelos', 'não consegui listar modelos', e); }
   }
-  if (!cand) return '';
-  if (kind === 'tts') { S.ttsModel = cand; LS.set('ttsModel', cand); } else { S.textModel = cand; LS.set('textModel', cand); }
-  LOG.w('modelos', 'modelo ' + failed + ' indisponível; trocado automaticamente por ' + cand);
-  return cand;
+  return (modelCache[kind] || []).find((n) => !tried.includes(n)) || '';
 }
 async function gemModelRetry(kind, pathFor, body, o) {
-  const cur = kind === 'tts' ? S.ttsModel : S.textModel;
-  try { return await gem(pathFor(cur), body, o); }
-  catch (e) {
-    if (e.status !== 404) throw e;
-    const next = await recoverModel(kind, cur, e.apiMsg);
-    if (!next) throw e;
-    return await gem(pathFor(next), body, o);
+  const start = kind === 'tts' ? S.ttsModel : S.textModel;
+  const tried = [];
+  let model = start;
+  for (let k = 0; k < 6; k++) {
+    tried.push(model);
+    try {
+      const res = await gem(pathFor(model), body, o);
+      if (model !== start) {
+        LOG.w('modelos', 'trocado ' + start + ' → ' + model + ' (funcionou)');
+        if (kind === 'tts') { S.ttsModel = model; LS.set('ttsModel', model); } else { S.textModel = model; LS.set('textModel', model); }
+      }
+      return res;
+    } catch (e) {
+      if (!(e.status === 404 || (e.status === 429 && e.daily))) throw e;
+      LOG.w('modelos', model + ' não serve (HTTP ' + e.status + '); tentando o próximo');
+      const next = await nextModel(kind, tried, e.apiMsg);
+      if (!next) { e.message = 'Nenhum modelo do Gemini funcionou na sua conta (testei: ' + tried.join(', ') + '). Veja o 📖 e me mande.'; throw e; }
+      model = next;
+    }
   }
+  throw new Error('Nenhum modelo do Gemini funcionou (testei: ' + tried.join(', ') + ').');
 }
 
 /* ============================================================
@@ -1375,13 +1398,13 @@ async function detectModels() {
     const names = (j.models || [])
       .filter((m) => (m.supportedGenerationMethods || []).includes('generateContent'))
       .map((m) => m.name.replace(/^models\//, ''));
-    const tts = names.filter((n) => /tts/.test(n));
-    const txt = names.filter((n) => /^gemini-/.test(n) && !/tts|image|embedding|live|audio|robotics|computer|lite|native|vision|learnlm|thinking|exp/.test(n));
+    const tts = rankModels('tts', names);
+    const txt = rankModels('text', names);
     $('#dlText').innerHTML = txt.map((n) => '<option value="' + esc(n) + '">').join('');
     $('#dlTts').innerHTML = tts.map((n) => '<option value="' + esc(n) + '">').join('');
     const curText = $('#textModel').value.trim(), curTts = $('#ttsModel').value.trim();
-    if (txt.length) $('#textModel').value = pickBest(txt, /flash/);
-    if (tts.length) $('#ttsModel').value = pickBest(tts, /flash/);
+    if (txt.length) $('#textModel').value = txt[0];
+    if (tts.length) $('#ttsModel').value = tts[0];
     pModels.set(100, 'Texto: ' + $('#textModel').value + ' · Voz: ' + $('#ttsModel').value);
     LS.set('detected', '1');
     LOG.i('modelos', 'detectados: ' + txt.length + ' de texto, ' + tts.length + ' de voz; escolhidos ' + $('#textModel').value + ' / ' + $('#ttsModel').value);
