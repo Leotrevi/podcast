@@ -244,7 +244,7 @@ footer{color:var(--muted); font-size:13px; padding:8px 0 20px}
   </section>
 
   <footer>
-    Os episódios ficam salvos neste navegador e tocam sem internet. No iPhone, abra no Safari, toque em Compartilhar e em Adicionar à Tela de Início para o app também abrir offline.
+    Os episódios ficam salvos neste navegador e tocam sem internet. No iPhone, abra no Safari, toque em Compartilhar e em Adicionar à Tela de Início para o app também abrir offline.<br><span id="appVer"></span>
   </footer>
 </div>
 
@@ -278,6 +278,12 @@ footer{color:var(--muted); font-size:13px; padding:8px 0 20px}
     <div style="height:8px"></div>
     <button id="btnDetect" type="button">Detectar modelos disponíveis</button>
     <div class="prog" id="progModels" hidden></div>
+  </details>
+  <details>
+    <summary>Atualizar o app</summary>
+    <p class="hint">Se a página parecer antiga, toque aqui. Limpa só o cache da página e recarrega; seus episódios e a voz baixada ficam.</p>
+    <button id="btnUpdate" type="button">Atualizar app agora</button>
+    <div class="prog" id="progUpd" hidden></div>
   </details>
   <div class="row" style="margin-top:16px">
     <button id="btnCloseDlg" type="button">Fechar</button>
@@ -463,6 +469,7 @@ function wavToPcm(ab) {
 /* ============================================================
    Logs avançados (botão 📖): guardam o que aconteceu, sem a chave
    ============================================================ */
+const APP_VERSION = 'v4';
 const LOG = (() => {
   const MAX = 1200, KEEP = 400;
   const store = (() => { try { return window.localStorage; } catch (e) { return null; } })();
@@ -634,8 +641,21 @@ function banner(msg, kind) {
   b.hidden = false;
   if (kind === 'err') b.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
+let wake = null;
+async function wakeOn() {
+  try {
+    if ('wakeLock' in navigator && !wake) {
+      wake = await navigator.wakeLock.request('screen');
+      wake.addEventListener('release', () => { wake = null; LOG.d('wake', 'liberada'); });
+      LOG.i('wake', 'tela mantida ligada durante a geração');
+    }
+  } catch (e) { LOG.w('wake', 'não disponível', e); }
+}
+function wakeOff() { try { if (wake) wake.release(); } catch (e) { /* ok */ } wake = null; }
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && busy) wakeOn(); });
 function lock(on) {
   busy = on;
+  if (on) wakeOn(); else wakeOff();
   document.querySelectorAll('[data-act]').forEach((b) => { b.disabled = on || !navigator.onLine; });
 }
 function esc(s) {
@@ -1411,7 +1431,7 @@ function syncEngine() {
   $('#voice').innerHTML = list.map((v) => '<option value="' + v[0] + '">' + v[1] + '</option>').join('');
   $('#voice').value = list.some((v) => v[0] === cur) ? cur : list[0][0];
   $('#engineHint').textContent = piper
-    ? 'Voz neural que roda no seu aparelho: sem cota e sem internet depois do primeiro download (cerca de 60 MB).'
+    ? 'Voz neural que roda no seu aparelho: sem cota e sem internet depois do primeiro download (cerca de 60 MB). Durante a geração, deixe o Safari aberto e a tela ligada.'
     : 'Mais expressiva, mas o plano gratuito do Gemini limita as requisições de voz.';
   $('#minsHint').textContent = piper ? 'Tamanho aproximado do áudio final.' : 'Cada cerca de 2 minutos de áudio usa 1 requisição de voz, e o plano gratuito do Gemini limita isso.';
   updateStats();
@@ -1487,7 +1507,7 @@ async function buildReport(full, prog) {
   const tf = (t) => new Date(t).toTimeString().slice(0, 8) + '.' + String(new Date(t).getMilliseconds()).padStart(3, '0');
   const cap = full ? 1500 : 260;
 
-  L.push('=== PODCAST DO VÍDEO · RELATÓRIO DE MANUTENÇÃO (app v3) ===');
+  L.push('=== PODCAST DO VÍDEO · RELATÓRIO DE MANUTENÇÃO (app ' + APP_VERSION + ') ===');
   L.push('gerado=' + new Date().toISOString() + ' sessão=s' + LOG.session + ' modo=' + (full ? 'completo' : 'resumo'));
 
   step(8, 'Ambiente…');
@@ -1612,15 +1632,37 @@ $('#btnLogDl').addEventListener('click', () => {
 $('#btnLogClear').addEventListener('click', async () => { LOG.clear(); LOG.i('app', 'logs limpos'); await refreshReport(); });
 $('#btnLogClose').addEventListener('click', () => { const d = $('#dlgLog'); d.close ? d.close() : d.removeAttribute('open'); });
 
+const pUpd = new Progress($('#progUpd'), null);
+$('#btnUpdate').addEventListener('click', async () => {
+  LOG.i('app', 'atualizar app solicitado');
+  pUpd.show('Atualizando o app');
+  try {
+    pUpd.set(20, 'Desligando o service worker…');
+    if ('serviceWorker' in navigator) for (const r of await navigator.serviceWorker.getRegistrations()) await r.unregister();
+    pUpd.set(55, 'Limpando o cache da página…');
+    for (const k of await caches.keys()) if (!/libs/.test(k)) await caches.delete(k);
+    pUpd.set(90, 'Recarregando…');
+    LOG.flush();
+    location.replace(location.pathname + '?atualizado=' + Date.now());
+  } catch (e) {
+    LOG.e('app', 'falha ao atualizar', e);
+    pUpd.hide();
+    banner('Não consegui atualizar: ' + e.message, 'err');
+  }
+});
+
 (async function init() {
-  LOG.i('app', 'init: motor=' + S.engine + ' chave=' + (S.key ? 'sim' : 'não') + ' online=' + navigator.onLine);
+  $('#appVer').textContent = 'Versão ' + APP_VERSION;
+  if (/atualizado=/.test(location.search)) { try { history.replaceState(null, '', location.pathname); } catch (e) { /* ok */ } }
+  LOG.i('app', 'init ' + APP_VERSION + ': motor=' + S.engine + ' chave=' + (S.key ? 'sim' : 'não') + ' online=' + navigator.onLine);
   netState();
   syncEngine();
   await loadLibrary();
   try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) { /* ok */ }
   if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
     try {
-      const reg = await navigator.serviceWorker.register('sw.js');
+      const reg = await navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' });
+      if (reg) reg.update().catch(() => {});
       LOG.i('sw', reg ? 'registrado, escopo ' + reg.scope : 'registro não devolveu nada');
       navigator.serviceWorker.addEventListener('controllerchange', () => LOG.i('sw', 'novo controlador assumiu'));
     } catch (e) { LOG.e('sw', 'registro falhou (sem offline do app; o áudio continua salvo)', e); }
