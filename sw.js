@@ -1,6 +1,6 @@
 // Service worker: a página é sempre buscada na rede primeiro (para nunca ficar presa numa versão antiga)
 // e só cai no cache quando está offline. Motor de voz e modelo da voz ficam em cache de longa duração.
-const CACHE = 'podcast-do-video-v4';       // a página
+const CACHE = 'podcast-do-video-v5';       // a página
 const LIBS = 'podcast-do-video-libs-v1';   // motor de voz (Piper), WebAssembly e modelo da voz
 const KEEP = [CACHE, LIBS];
 const SHELL = ['./', './index.html'];

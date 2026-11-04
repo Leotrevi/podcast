@@ -3,119 +3,123 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#101A2E">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#0A0F1E">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Podcast do vídeo">
 <title>Podcast do vídeo</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🎙%3C/text%3E%3C/svg%3E">
 <style>
 :root{
-  --bg:#E7ECF3; --card:#FFFFFF; --ink:#101A2E; --muted:#5A6680; --line:#D5DCE8;
-  --accent:#1F4FD8; --accent-ink:#FFFFFF; --signal:#FFC22E; --track:#101A2E;
-  --danger:#B3261E; --ok:#17703F; --field:#F4F6FA;
+  color-scheme:dark;
+  --bg:#0A0F1E; --card:#131B33; --card2:#1A2547; --line:#27325A; --field:#0D1327; --track:#060912;
+  --ink:#EAEEFB; --muted:#9AA6C8; --amber:#FFC24B; --amber-ink:#1A1300; --blue:#9DB4FF;
+  --danger:#FF7B72; --ok:#6FD6A0;
   --serif: ui-serif, "Iowan Old Style", "Palatino Linotype", Georgia, serif;
   --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
-@media (prefers-color-scheme: dark){
-  :root{
-    --bg:#0B1120; --card:#151D33; --ink:#E8EDF8; --muted:#9AA6C2; --line:#27314E;
-    --accent:#7FA0FF; --accent-ink:#0B1120; --signal:#FFC22E; --track:#070B16;
-    --danger:#FF8A80; --ok:#6FD39A; --field:#0F1629;
-  }
-}
 *{box-sizing:border-box}
-html{-webkit-text-size-adjust:100%}
+html{-webkit-text-size-adjust:100%; background:var(--bg)}
 body{
-  margin:0; background:var(--bg); color:var(--ink); font:16px/1.5 var(--sans);
-  padding:env(safe-area-inset-top,0) env(safe-area-inset-right,0) calc(env(safe-area-inset-bottom,0) + 40px) env(safe-area-inset-left,0);
+  margin:0; color:var(--ink); font:16px/1.55 var(--sans);
+  background:radial-gradient(900px 420px at 50% -140px, #22337A 0%, rgba(34,51,122,0) 70%), var(--bg);
+  background-repeat:no-repeat;
+  padding:env(safe-area-inset-top,0) env(safe-area-inset-right,0) calc(env(safe-area-inset-bottom,0) + 48px) env(safe-area-inset-left,0);
 }
 .wrap{max-width:680px; margin:0 auto; padding:0 16px}
-header{padding:22px 0 8px; display:flex; align-items:flex-start; justify-content:space-between; gap:12px}
-h1{font:700 30px/1.1 var(--serif); margin:0; letter-spacing:-.01em}
-.sub{margin:6px 0 0; color:var(--muted); font-size:15px}
-h2{font:700 20px/1.2 var(--serif); margin:0 0 12px}
-.card{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:16px; margin:14px 0}
-label{display:block; font-size:14px; font-weight:600; margin:12px 0 6px}
-label:first-child{margin-top:0}
-input[type=text],input[type=password],input[type=url],select,textarea{
+header{display:flex; align-items:flex-start; justify-content:space-between; gap:12px; padding:26px 0 6px}
+.eyebrow{font-size:12px; letter-spacing:.14em; font-weight:700; color:var(--amber)}
+h1{font:700 32px/1.1 var(--serif); margin:6px 0 8px; letter-spacing:-.01em}
+.sub{margin:0; color:var(--muted); font-size:15px; max-width:32ch}
+.hdr-actions{display:flex; flex-direction:column; align-items:flex-end; gap:8px; flex:none}
+h2{font:700 21px/1.2 var(--serif); margin:2px 0 6px}
+.lead{margin:0 0 14px; color:var(--muted); font-size:15px}
+.card{background:var(--card); border:1px solid var(--line); border-radius:18px; padding:18px 16px; margin:14px 0; box-shadow:0 1px 0 rgba(255,255,255,.03) inset, 0 12px 30px rgba(0,0,0,.25)}
+.step{display:grid; grid-template-columns:36px 1fr; gap:10px}
+.step > div:last-child{min-width:0}
+.num{width:36px; height:36px; border-radius:50%; border:1.5px solid var(--amber); color:var(--amber); display:grid; place-items:center; font:700 20px/1 var(--serif)}
+label{display:block; font-size:14px; font-weight:600; margin:14px 0 6px}
+input[type=text],input[type=url],select,textarea{
   width:100%; font:inherit; color:var(--ink); background:var(--field);
-  border:1px solid var(--line); border-radius:10px; padding:11px 12px;
+  border:1px solid var(--line); border-radius:12px; padding:12px 13px;
 }
-textarea{resize:vertical; min-height:90px; line-height:1.5}
-#script{min-height:280px; font-size:16px}
-input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible,summary:focus-visible{
-  outline:3px solid var(--accent); outline-offset:2px;
-}
-button{
-  font:inherit; font-weight:600; border-radius:10px; border:1px solid var(--line);
-  background:var(--card); color:var(--ink); padding:11px 14px; cursor:pointer; min-height:44px;
+textarea{resize:vertical; min-height:96px; line-height:1.5}
+#script{min-height:240px}
+::placeholder{color:#6C789E}
+input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible,summary:focus-visible,a:focus-visible{outline:3px solid var(--blue); outline-offset:2px}
+button,.btn{
+  font:inherit; font-weight:600; border-radius:12px; border:1px solid var(--line); background:var(--card2); color:var(--ink);
+  padding:12px 15px; cursor:pointer; min-height:48px; text-decoration:none; display:inline-flex; align-items:center; justify-content:center; text-align:center;
 }
 button:disabled{opacity:.5; cursor:not-allowed}
-button.primary{background:var(--accent); color:var(--accent-ink); border-color:transparent; width:100%; font-size:17px; min-height:50px}
-button.ghost{background:transparent}
-button.link{border:0; background:none; padding:4px 6px; min-height:0; color:var(--accent); text-decoration:underline}
-.row{display:flex; gap:8px; flex-wrap:wrap}
-.row > *{flex:1 1 auto}
-.hint{font-size:13px; color:var(--muted); margin:6px 0 0}
-.tabs{display:grid; grid-template-columns:1fr 1fr; gap:6px; background:var(--field); border:1px solid var(--line); border-radius:12px; padding:4px; margin:16px 0 14px}
-.tabs button{border:0; background:transparent; min-height:42px}
-.tabs button[aria-selected=true]{background:var(--card); box-shadow:0 0 0 1px var(--line)}
+.primary{background:var(--amber); color:var(--amber-ink); border-color:transparent; font-size:17px; min-height:54px; font-weight:700}
+.danger{background:transparent; color:var(--danger); border-color:rgba(255,123,114,.45)}
+.ghost{background:transparent}
+.link{border:0; background:none; padding:4px 6px; min-height:0; color:var(--blue); text-decoration:underline}
+.btnrow{display:flex; gap:10px; flex-wrap:wrap; margin-top:14px}
+.btnrow > *{flex:1 1 160px}
+.hint{font-size:13px; color:var(--muted); margin:8px 0 0}
+details.more{margin-top:12px; border:1px solid var(--line); border-radius:12px; padding:0 12px; background:rgba(255,255,255,.015)}
+details.more summary{cursor:pointer; font-weight:600; font-size:14px; padding:12px 0; color:var(--blue)}
+details.more[open] summary{margin-bottom:2px}
+details.more > :last-child{margin-bottom:12px}
+.fieldhead{display:flex; justify-content:space-between; align-items:baseline; gap:8px}
+.rangeval{font:700 20px/1 var(--serif); color:var(--amber)}
+input[type=range]{width:100%; accent-color:var(--amber)}
 .thumb{display:flex; gap:10px; align-items:center; margin-top:10px}
 .thumb img{width:96px; height:54px; object-fit:cover; border-radius:8px; background:var(--field)}
-.thumb span{font-size:13px; color:var(--muted)}
-.pill{display:inline-block; font-size:12px; font-weight:700; padding:4px 9px; border-radius:99px; border:1px solid var(--line); color:var(--muted); white-space:nowrap}
+.thumb span{font-size:13px; color:var(--ok)}
+.pill{display:inline-block; font-size:12px; font-weight:700; padding:4px 10px; border-radius:99px; border:1px solid var(--line); color:var(--muted); white-space:nowrap}
 .pill.off{color:var(--danger); border-color:var(--danger)}
+.iconbtn{min-height:44px; min-width:44px; padding:8px 12px; font-size:20px}
+.stats{display:flex; justify-content:space-between; gap:8px; font-size:13px; color:var(--muted); margin-top:6px}
+.check{display:flex; gap:10px; align-items:flex-start; font-weight:400; font-size:14px; margin:12px 0 0}
+.check input{margin-top:4px; width:18px; height:18px; accent-color:var(--amber)}
 
-/* Barra de status 0–100%: medidor segmentado */
+/* Barra de status 0–100% */
 .prog{margin-top:14px}
 .prog-top{display:flex; justify-content:space-between; align-items:baseline; gap:10px; margin-bottom:6px; font-size:14px}
 .prog-label{font-weight:600}
-.prog-pct{font:700 20px/1 var(--serif); font-variant-numeric:tabular-nums}
-.meter{position:relative; height:20px; border-radius:6px; background:var(--track); overflow:hidden}
-.meter i{display:block; height:100%; width:0; background:var(--signal); transition:width .35s ease}
+.prog-pct{font:700 22px/1 var(--serif); color:var(--amber); font-variant-numeric:tabular-nums}
+.meter{position:relative; height:20px; border-radius:6px; background:var(--track); overflow:hidden; border:1px solid #0000}
+.meter i{display:block; height:100%; width:0; background:var(--amber); transition:width .35s ease}
 .meter::after{content:""; position:absolute; inset:0; background:repeating-linear-gradient(90deg, transparent 0 7px, var(--card) 7px 9px); pointer-events:none}
 .prog-bottom{display:flex; justify-content:space-between; align-items:center; gap:8px; margin-top:6px; min-height:28px}
 .prog-note{font-size:13px; color:var(--muted)}
 
-.banner{margin:12px 0; padding:12px 14px; border-radius:10px; font-size:14px; border:1px solid var(--line); background:var(--card)}
+.banner{margin:12px 0; padding:12px 14px; border-radius:12px; font-size:14px; border:1px solid var(--line); background:var(--card)}
 .banner.err{border-color:var(--danger); color:var(--danger)}
 .banner.ok{border-color:var(--ok); color:var(--ok)}
 .banner.info{color:var(--muted)}
 
-.chips{display:flex; flex-wrap:wrap; gap:6px}
-.chips button{padding:7px 12px; min-height:38px; font-size:14px; border-radius:99px}
-.stats{display:flex; justify-content:space-between; font-size:13px; color:var(--muted); margin-top:6px}
-input[type=range]{width:100%; accent-color:var(--accent)}
-.rangeval{font:700 22px/1 var(--serif)}
-.fieldhead{display:flex; justify-content:space-between; align-items:baseline}
-.check{display:flex; gap:8px; align-items:flex-start; font-weight:400; font-size:14px; margin-top:10px}
-.check input{margin-top:4px}
-
 /* Player */
-.player h2{margin-bottom:4px}
-.player .meta{color:var(--muted); font-size:13px; margin-bottom:12px}
-.pctrl{display:flex; align-items:center; gap:10px; justify-content:center; margin:6px 0 2px}
-.playbtn{width:64px; height:64px; border-radius:50%; background:var(--accent); color:var(--accent-ink); border:0; font-size:26px; padding:0}
-.skip{min-width:64px}
-.seek{display:flex; align-items:center; gap:10px; font-size:13px; font-variant-numeric:tabular-nums; margin-top:12px}
+.player .meta{color:var(--muted); font-size:13px; margin-bottom:10px}
+.pctrl{display:flex; align-items:center; gap:12px; justify-content:center; margin:8px 0 2px}
+.playbtn{width:68px; height:68px; border-radius:50%; background:var(--amber); color:var(--amber-ink); border:0; font-size:26px; padding:0}
+.skip{min-width:68px}
+.seek{display:flex; align-items:center; gap:10px; font-size:13px; font-variant-numeric:tabular-nums; margin-top:14px}
 .seek input{flex:1}
-.pct-play{font-weight:700; min-width:40px; text-align:right}
+.pct-play{font-weight:700; min-width:40px; text-align:right; color:var(--amber)}
 
 /* Biblioteca */
-.ep{border-top:1px solid var(--line); padding:12px 0}
-.ep:first-of-type{border-top:0}
+.ep{border-top:1px solid var(--line); padding:14px 0}
+.ep:first-of-type{border-top:0; padding-top:4px}
 .ep h3{margin:0 0 2px; font-size:16px; font-weight:700}
-.ep .m{font-size:13px; color:var(--muted); margin-bottom:8px}
-.ep .btns{display:flex; gap:6px; flex-wrap:wrap}
-.ep .btns button{padding:8px 12px; min-height:40px; font-size:14px}
-.empty{color:var(--muted); font-size:14px}
-dialog{border:1px solid var(--line); border-radius:14px; padding:18px; max-width:min(560px,92vw); width:100%; background:var(--card); color:var(--ink)}
-dialog::backdrop{background:rgba(5,9,20,.6)}
-details{margin-top:10px}
-summary{cursor:pointer; font-weight:600; font-size:14px}
+.ep .m{font-size:13px; color:var(--muted); margin-bottom:10px}
+.ep .btns{display:flex; gap:8px; flex-wrap:wrap}
+.ep .btns button{padding:8px 13px; min-height:42px; font-size:14px}
+.empty{color:var(--muted); font-size:14px; margin:6px 0}
+.storage{display:grid; gap:10px; margin-top:8px}
+.bar2{height:10px; border-radius:99px; background:var(--track); overflow:hidden; display:flex}
+.bar2 i{display:block; height:100%}
+.legend{display:flex; gap:14px; flex-wrap:wrap; font-size:13px; color:var(--muted)}
+.dot{display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:6px}
+dialog{border:1px solid var(--line); border-radius:18px; padding:18px; max-width:min(560px,92vw); width:100%; background:var(--card); color:var(--ink)}
+dialog::backdrop{background:rgba(3,6,14,.72)}
 [hidden]{display:none !important}
-footer{color:var(--muted); font-size:13px; padding:8px 0 20px}
+footer{color:var(--muted); font-size:13px; padding:6px 0 20px}
 @media (prefers-reduced-motion: reduce){ .meter i{transition:none} }
 </style>
 </head>
@@ -123,94 +127,85 @@ footer{color:var(--muted); font-size:13px; padding:8px 0 20px}
 <div class="wrap">
   <header>
     <div>
-      <h1>Podcast do vídeo</h1>
-      <p class="sub">Cole um link do YouTube e ouça um podcast solo sobre ele.</p>
+      <div class="eyebrow">PODCAST DO VÍDEO</div>
+      <h1>Do YouTube para o seu ouvido</h1>
+      <p class="sub">Transforme um vídeo em podcast e ouça offline, sem limite.</p>
     </div>
-    <div class="row" style="flex:none; flex-direction:column; align-items:flex-end">
-      <div class="row" style="flex:none;flex-wrap:nowrap;justify-content:flex-end"><button id="btnLog" class="ghost" type="button" aria-label="Logs para manutenção" title="Logs para manutenção">📖</button><button id="btnSettings" class="ghost" type="button">Ajustes</button></div>
-      <span id="netPill" class="pill" hidden>Offline</span>
+    <div class="hdr-actions">
+      <button id="btnLog" class="ghost iconbtn" type="button" aria-label="Logs para manutenção" title="Logs para manutenção">📖</button>
+      <span id="netPill" class="pill off" hidden>Offline</span>
     </div>
   </header>
 
   <div id="banner" class="banner" role="status" hidden></div>
 
-  <section class="card" aria-labelledby="h-video">
-    <h2 id="h-video">Seu vídeo</h2>
-    <label for="url">Link do YouTube</label>
-    <input id="url" type="url" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="https://www.youtube.com/watch?v=...">
-    <div class="thumb" id="thumbRow" hidden>
-      <img id="thumb" alt="" width="96" height="54">
-      <span id="thumbTxt">Vídeo reconhecido</span>
-    </div>
-    <label for="engine">Motor de voz</label>
-    <select id="engine">
-      <option value="piper">Piper: roda no aparelho, sem limite (recomendado)</option>
-      <option value="gemini">Gemini: mais expressiva, com limite gratuito</option>
-    </select>
-    <p class="hint" id="engineHint"></p>
-    <label for="voice">Voz do apresentador (masculina)</label>
-    <select id="voice"></select>
-
-    <div class="tabs" role="tablist" aria-label="Modo">
-      <button id="tabQuick" role="tab" aria-selected="true" type="button">Rápido</button>
-      <button id="tabAdv" role="tab" aria-selected="false" type="button">Avançado</button>
-    </div>
-
-    <div id="panelQuick" role="tabpanel">
-      <p class="hint" style="margin-top:0">Um toque: o Gemini assiste ao vídeo, escreve o roteiro e a voz narra. O episódio fica salvo para ouvir offline.</p>
-      <div style="height:10px"></div>
-      <button id="btnQuick" class="primary" type="button" data-act>Gerar podcast</button>
-      <div class="prog" id="progQuick" hidden></div>
-    </div>
-
-    <div id="panelAdv" role="tabpanel" hidden>
-      <label for="tone">Tom</label>
-      <select id="tone"></select>
-
-      <div class="fieldhead" style="margin-top:12px">
-        <label for="mins" style="margin:0">Duração do áudio</label>
-        <span class="rangeval" id="minsVal">5 min</span>
+  <!-- PASSO 1 -->
+  <section class="card step" aria-labelledby="h1s">
+    <div class="num">1</div>
+    <div>
+      <h2 id="h1s">Copie o prompt</h2>
+      <p class="lead">Cole o link do vídeo. O app monta o pedido pronto para você levar ao Gemini.</p>
+      <label for="url" style="margin-top:0">Link do YouTube</label>
+      <input id="url" type="url" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="https://www.youtube.com/watch?v=...">
+      <div class="thumb" id="thumbRow" hidden>
+        <img id="thumb" alt="" width="96" height="54">
+        <span id="thumbTxt">Vídeo reconhecido</span>
       </div>
-      <input id="mins" type="range" min="1" max="30" step="1" value="5">
-      <p class="hint" id="minsHint">Cada cerca de 2 minutos de áudio usa 1 requisição de voz, e o plano gratuito do Gemini limita isso.</p>
 
-      <label for="extra">Pedidos para o Gemini (opcional)</label>
-      <textarea id="extra" placeholder="Ex.: foque nas dicas práticas, use exemplos do dia a dia, explique os termos difíceis"></textarea>
+      <details class="more">
+        <summary>Personalizar (tom, duração, pedidos)</summary>
+        <label for="tone">Tom</label>
+        <select id="tone"></select>
+        <div class="fieldhead" style="margin-top:14px">
+          <label for="mins" style="margin:0">Duração do áudio</label>
+          <span class="rangeval" id="minsVal">6 min</span>
+        </div>
+        <input id="mins" type="range" min="1" max="30" step="1" value="6">
+        <p class="hint" id="minsHint"></p>
+        <label for="extra">Pedidos extras (opcional)</label>
+        <textarea id="extra" style="min-height:70px" placeholder="Ex.: foque nas dicas práticas, explique os termos difíceis"></textarea>
+      </details>
 
-      <div style="height:12px"></div>
-      <button id="btnScript" class="primary" type="button" data-act>Gerar roteiro</button>
-      <div class="prog" id="progScript" hidden></div>
+      <div class="btnrow">
+        <button id="btnCopy" class="primary" type="button">Copiar prompt</button>
+        <a id="lnkGemini" class="btn" href="https://gemini.google.com/app" target="_blank" rel="noopener">Abrir o Gemini ↗</a>
+      </div>
+      <details class="more">
+        <summary>Ver o prompt completo</summary>
+        <textarea id="promptView" readonly spellcheck="false" style="min-height:220px; font-size:13px"></textarea>
+      </details>
     </div>
   </section>
 
-  <section class="card" id="editor" hidden aria-labelledby="h-script">
-    <h2 id="h-script">Roteiro</h2>
-    <label for="title">Título do episódio</label>
-    <input id="title" type="text" autocomplete="off">
-    <label for="script">Texto que o apresentador vai falar (você pode editar)</label>
-    <textarea id="script"></textarea>
-    <div class="stats"><span id="stWords">0 palavras</span><span id="stDur">0 min de áudio</span></div>
-
-    <label for="instr">Dê seu pitaco</label>
-    <textarea id="instr" style="min-height:70px" placeholder="Ex.: comece com uma pergunta, tire a parte do patrocinador, conte o final com mais emoção"></textarea>
-    <div class="row" style="margin-top:8px">
-      <button id="btnApply" type="button" data-act>Reescrever com meu pedido</button>
+  <!-- PASSO 2 -->
+  <section class="card step" aria-labelledby="h2s">
+    <div class="num">2</div>
+    <div>
+      <h2 id="h2s">Cole o roteiro do Gemini</h2>
+      <p class="lead">No Gemini, cole o prompt e envie. Quando a resposta terminar, copie o texto inteiro e traga aqui.</p>
+      <button id="btnPaste" class="primary" type="button" style="width:100%">Colar da área de transferência</button>
+      <p class="hint">Se o Safari não deixar colar sozinho, toque e segure dentro da caixa abaixo e escolha Colar.</p>
+      <label for="title">Título do episódio</label>
+      <input id="title" type="text" autocomplete="off" placeholder="Preenche sozinho quando o roteiro tem a linha TÍTULO:">
+      <label for="script">Roteiro (você pode editar)</label>
+      <textarea id="script" spellcheck="false" placeholder="O roteiro do podcast aparece aqui."></textarea>
+      <div class="stats"><span id="stWords">0 palavras</span><span id="stDur">0 min de áudio</span></div>
     </div>
-    <div class="row" style="margin-top:8px">
-      <button id="btnShorter" type="button" data-act>Mais curto</button>
-      <button id="btnLonger" type="button" data-act>Mais longo</button>
+  </section>
+
+  <!-- PASSO 3 -->
+  <section class="card step" aria-labelledby="h3s">
+    <div class="num">3</div>
+    <div>
+      <h2 id="h3s">Gere o áudio offline</h2>
+      <p class="lead">A voz roda no seu aparelho: sem limite e sem internet. Na primeira vez o app baixa a voz (cerca de 60 MB); depois ela fica guardada. Deixe o Safari aberto e a tela ligada enquanto gera.</p>
+      <label for="voice" style="margin-top:0">Voz do apresentador (masculina)</label>
+      <select id="voice"></select>
+      <div class="btnrow"><button id="btnAudio" class="primary" type="button">Gerar áudio</button></div>
+      <p class="hint" id="audioHint"></p>
+      <div class="prog" id="progAudio" hidden></div>
+      <button id="btnLive" class="ghost" type="button" style="width:100%; margin-top:12px">Ouvir ao vivo com a voz do aparelho (sem salvar)</button>
     </div>
-    <label>Mudar o tom</label>
-    <div class="chips" id="toneChips"></div>
-    <label class="check"><input type="checkbox" id="withVideo" checked><span>Consultar o vídeo de novo ao reescrever (melhor para textos mais longos, porém mais lento)</span></label>
-
-    <div class="prog" id="progRevise" hidden></div>
-
-    <div style="height:16px"></div>
-    <button id="btnAudio" class="primary" type="button" data-act>Gerar áudio deste roteiro</button>
-    <p class="hint" id="audioHint"></p>
-    <button id="btnLive" class="ghost" type="button" style="margin-top:8px;width:100%">Ouvir ao vivo com a voz do aparelho (sem salvar)</button>
-    <div class="prog" id="progAudio" hidden></div>
   </section>
 
   <section class="card player" id="playerCard" hidden aria-labelledby="pTitle">
@@ -228,7 +223,7 @@ footer{color:var(--muted); font-size:13px; padding:8px 0 20px}
       <span id="tDur">0:00</span>
       <span class="pct-play" id="pPct">0%</span>
     </div>
-    <div class="row" style="margin-top:12px">
+    <div class="btnrow">
       <button id="btnSpeed" type="button">Velocidade 1×</button>
       <button id="btnDl" type="button">Baixar áudio</button>
     </div>
@@ -236,58 +231,52 @@ footer{color:var(--muted); font-size:13px; padding:8px 0 20px}
   </section>
 
   <section class="card" aria-labelledby="h-lib">
-    <div class="fieldhead">
-      <h2 id="h-lib">Seus episódios</h2>
-      <span class="pill" id="usage" hidden></span>
+    <h2 id="h-lib">Seus episódios</h2>
+    <div id="list"><p class="empty">Nenhum episódio ainda. Siga os 3 passos acima.</p></div>
+    <label class="check"><input type="checkbox" id="autodel"><span>Apagar o episódio sozinho quando eu terminar de ouvir</span></label>
+  </section>
+
+  <section class="card" aria-labelledby="h-store">
+    <h2 id="h-store">Espaço e limpeza</h2>
+    <p class="lead" style="margin-bottom:8px">Os áudios ficam só neste aparelho. Quando terminar de ouvir, apague para liberar espaço.</p>
+    <div class="storage">
+      <div class="bar2" aria-hidden="true"><i id="barAudio" style="background:var(--amber); width:0"></i><i id="barOther" style="background:var(--blue); width:0"></i></div>
+      <div class="legend">
+        <span><span class="dot" style="background:var(--amber)"></span>Áudios: <b id="uAudio">0 KB</b></span>
+        <span><span class="dot" style="background:var(--blue)"></span>Voz, app e outros: <b id="uOther">0 KB</b></span>
+      </div>
     </div>
-    <div id="list"><p class="empty">Nenhum episódio ainda.</p></div>
+    <div class="btnrow">
+      <button id="btnClearAudio" class="danger" type="button">Apagar todos os áudios</button>
+      <button id="btnClearVoice" class="danger" type="button">Apagar voz baixada e cache</button>
+    </div>
+    <p class="hint">Apagar a voz libera cerca de 60 MB; na próxima geração o app baixa de novo.</p>
+    <div class="prog" id="progClear" hidden></div>
+    <details class="more">
+      <summary>A página parece desatualizada?</summary>
+      <p class="hint" style="margin-top:0">Limpa só o cache da página e recarrega. Seus episódios e a voz baixada ficam.</p>
+      <button id="btnUpdate" type="button" style="width:100%">Atualizar o app agora</button>
+      <div class="prog" id="progUpd" hidden></div>
+    </details>
   </section>
 
   <footer>
-    Os episódios ficam salvos neste navegador e tocam sem internet. No iPhone, abra no Safari, toque em Compartilhar e em Adicionar à Tela de Início para o app também abrir offline.<br><span id="appVer"></span>
+    No iPhone: abra no Safari, toque em Compartilhar e em Adicionar à Tela de Início. Assim o app abre offline como um aplicativo.<br>
+    <span id="appVer"></span>
   </footer>
 </div>
 
 <dialog id="dlgLog">
   <h2>Logs para manutenção</h2>
-  <p class="hint" style="margin-top:0">Toque em Copiar tudo e cole na conversa com o Claude. A chave do Gemini nunca entra no relatório.</p>
+  <p class="hint" style="margin-top:0">Toque em Copiar tudo e cole na conversa com o Claude.</p>
   <label class="check"><input type="checkbox" id="logFull"><span>Relatório completo (bem mais longo, só se o resumo não bastar)</span></label>
-  <textarea id="logText" readonly spellcheck="false" style="min-height:260px;font:12px/1.4 ui-monospace,Menlo,monospace;margin-top:10px"></textarea>
+  <textarea id="logText" readonly spellcheck="false" style="min-height:260px; font:12px/1.4 ui-monospace,Menlo,monospace; margin-top:10px"></textarea>
   <div class="prog" id="progLog" hidden></div>
-  <div class="row" style="margin-top:12px">
-    <button id="btnLogCopy" class="primary" type="button" style="width:auto">Copiar tudo</button>
+  <div class="btnrow">
+    <button id="btnLogCopy" class="primary" type="button">Copiar tudo</button>
     <button id="btnLogDl" type="button">Baixar .txt</button>
     <button id="btnLogClear" type="button">Limpar logs</button>
     <button id="btnLogClose" type="button">Fechar</button>
-  </div>
-</dialog>
-
-<dialog id="dlg">
-  <h2>Ajustes</h2>
-  <label for="key">Chave de API do Gemini</label>
-  <input id="key" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Cole sua chave aqui">
-  <p class="hint">Grátis em <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a>, entrando com sua conta Google. A chave fica só neste navegador. Não coloque a chave dentro do código que sobe para o GitHub.</p>
-  <details>
-    <summary>Modelos</summary>
-    <label for="textModel">Modelo de texto (roteiro e vídeo)</label>
-    <input id="textModel" type="text" list="dlText" autocomplete="off" spellcheck="false">
-    <datalist id="dlText"></datalist>
-    <label for="ttsModel">Modelo de voz</label>
-    <input id="ttsModel" type="text" list="dlTts" autocomplete="off" spellcheck="false">
-    <datalist id="dlTts"></datalist>
-    <div style="height:8px"></div>
-    <button id="btnDetect" type="button">Detectar modelos disponíveis</button>
-    <div class="prog" id="progModels" hidden></div>
-  </details>
-  <details>
-    <summary>Atualizar o app</summary>
-    <p class="hint">Se a página parecer antiga, toque aqui. Limpa só o cache da página e recarrega; seus episódios e a voz baixada ficam.</p>
-    <button id="btnUpdate" type="button">Atualizar app agora</button>
-    <div class="prog" id="progUpd" hidden></div>
-  </details>
-  <div class="row" style="margin-top:16px">
-    <button id="btnCloseDlg" type="button">Fechar</button>
-    <button id="btnSave" class="primary" type="button" style="width:auto">Salvar</button>
   </div>
 </dialog>
 
@@ -349,19 +338,20 @@ function sanitizeScript(t) {
     .trim();
 }
 
+// Procura "TÍTULO: ..." nas primeiras linhas (o Gemini às vezes escreve uma frase antes) e separa o título.
 function parseScript(raw) {
   let t = String(raw || '').replace(/\r/g, '').trim();
   let title = '';
   const lines = t.split('\n');
-  const idx = lines.findIndex((l) => l.trim() !== '');
-  if (idx >= 0) {
-    const m = /^[\s*#_]*T[ÍI]TULO\s*:?\s*(.*)$/i.exec(lines[idx]);
-    if (m) {
-      title = m[1].replace(/[*_#"“”]/g, '').trim();
-      lines.splice(idx, 1);
-      t = lines.join('\n');
-    }
+  const re = /^[\s*#_>-]*T[ÍI]TULO\s*:\s*(.*)$/i;
+  let seen = 0, idx = -1;
+  for (let i = 0; i < lines.length && seen < 6; i++) {
+    if (!lines[i].trim()) continue;
+    seen++;
+    const m = re.exec(lines[i]);
+    if (m) { idx = i; title = m[1].replace(/[*_#"“”]/g, '').trim(); break; }
   }
+  if (idx >= 0) { lines.splice(0, idx + 1); t = lines.join('\n'); }
   return { title, script: sanitizeScript(t) };
 }
 
@@ -406,35 +396,6 @@ function buildWav(chunks, rate, gapSec = 0.35) {
   return { blob: new Blob(parts, { type: 'audio/wav' }), duration: data / (rate * 2), bytes: 44 + data };
 }
 
-function parseRate(mime) {
-  const m = /rate=(\d+)/.exec(mime || '');
-  return m ? +m[1] : 24000;
-}
-function b64ToBytes(b64) {
-  const bin = atob(b64);
-  const out = new Uint8Array(bin.length);
-  for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
-  return out;
-}
-
-// Extrai, de um erro da API, quantos segundos esperar e se o limite é diário/zerado.
-function readApiError(status, body) {
-  let msg = '', retry = 0, daily = false;
-  try {
-    const e = (typeof body === 'string' ? JSON.parse(body) : body).error || {};
-    msg = e.message || '';
-    for (const d of e.details || []) {
-      if (d.retryDelay) retry = parseFloat(d.retryDelay) || 0;
-    }
-  } catch (x) { msg = typeof body === 'string' ? body.slice(0, 300) : ''; }
-  const raw = typeof body === 'string' ? body : JSON.stringify(body || {});
-  if (!retry) {
-    const m = /retry in ([\d.]+)\s*s/i.exec(msg);
-    if (m) retry = parseFloat(m[1]);
-  }
-  if (/PerDay/i.test(raw) || /limit:\s*0\b/.test(raw)) daily = true;
-  return { status, msg, retry, daily };
-}
 // Lê um WAV (PCM 16 bits ou float 32) e devolve PCM 16 bits mono + taxa de amostragem.
 function wavToPcm(ab) {
   const v = new DataView(ab);
@@ -464,23 +425,54 @@ function wavToPcm(ab) {
   } else throw new Error('Formato de áudio da voz não suportado.');
   return { pcm: new Uint8Array(out.buffer), rate: fmt.rate };
 }
-// Ordena os modelos do Gemini do melhor para o pior candidato. Fora: geração de vídeo/imagem (omni), live etc.
-function rankModels(kind, names) {
-  const bad = kind === 'tts'
-    ? /image|embedding|live|robotics|computer|native|vision|learnlm|exp|omni|veo|imagen|transcribe|customtools/
-    : /tts|image|embedding|live|audio|robotics|computer|native|vision|learnlm|exp|omni|veo|imagen|thinking|gemma|transcribe|customtools/;
-  const ver = (n) => { const m = /gemini-(\d+)(?:\.(\d+))?/.exec(n); return m ? (+m[1]) * 100 + (+(m[2] || 0)) : -1; };
-  const tier = (n) => (/pro/.test(n) ? 2 : /lite/.test(n) ? 1 : 0);
-  return names
-    .filter((n) => /^gemini-\d+(\.\d+)?-(flash|pro)/.test(n) && (kind !== 'tts' || /tts/.test(n)) && !bad.test(n))
-    .sort((a, b) => (/preview/.test(a) - /preview/.test(b)) || (tier(a) - tier(b)) || (ver(b) - ver(a)) || a.localeCompare(b));
+
+function lenFromWords(w) {
+  w = Math.round(w / 10) * 10;
+  return 'aproximadamente ' + w + ' palavras (cerca de ' + fmtMin(w / WPM) + ' de áudio falado, a ~' + WPM + ' palavras por minuto), com margem de 10%';
+}
+
+const TONES = {
+  neutro: ['Conversa de podcast', 'tom conversacional, caloroso e claro, como um apresentador experiente falando com um ouvinte'],
+  genz: ['Como a Geração Z explicaria', 'linguagem da Geração Z: informal, ritmo rápido, gírias brasileiras atuais com moderação, comparações com memes e com o dia a dia, sem forçar e sem ficar confuso'],
+  tecnico: ['Mais técnico', 'tom técnico e preciso, com os termos corretos e a explicação do porquê das coisas, para quem já tem alguma base'],
+  didatico: ['Didático para iniciantes', 'tom didático, passo a passo, com analogias simples e sem pressupor conhecimento prévio'],
+  humor: ['Bem-humorado', 'tom leve e bem-humorado, com piadas curtas e ironia gentil, sem perder o conteúdo'],
+  narrativo: ['Contando uma história', 'estilo narrativo de storytelling, com curiosidade, tensão e ganchos entre os blocos'],
+  formal: ['Formal e jornalístico', 'tom formal e jornalístico, objetivo e sóbrio']
+};
+
+function makePrompt({ url, tone, minutes, extra }) {
+  const t = TONES[tone] ? TONES[tone][1] : TONES.neutro[1];
+  return [
+    'Assista ao vídeo do YouTube deste link e transforme o conteúdo dele em um roteiro de podcast narrado por UMA pessoa só (um apresentador homem). O texto será lido em voz alta por um sintetizador de voz, então precisa ser 100% falável.',
+    '',
+    'VÍDEO: ' + url,
+    '',
+    'REGRAS',
+    '- Português do Brasil, natural, como quem fala ao microfone para o ouvinte (trate o ouvinte por "você").',
+    '- Um único apresentador. Nada de diálogo, entrevistado, co-apresentador ou troca de falas.',
+    '- Seja fiel ao vídeo: não invente fatos, números, nomes ou citações. Se algo não estiver claro, deixe de fora. Se você não conseguir acessar o vídeo, diga isso em vez de inventar um roteiro.',
+    '- Se o vídeo estiver em outro idioma, traduza as ideias para o português do Brasil.',
+    '- Estrutura: abertura que prende a atenção, apresentação do assunto (cite o canal e o título se souber), desenvolvimento em blocos com transições naturais e fechamento com os pontos principais.',
+    '- Sem markdown, listas, asteriscos, emojis, hashtags, marcações de tempo ou indicações de cena e de som entre colchetes ou parênteses.',
+    '- Escreva números, siglas e símbolos do jeito que se fala (por exemplo, "R$ 5" vira "cinco reais" e "50%" vira "cinquenta por cento"). Evite ler endereços de internet.',
+    '- Parágrafos curtos separados por uma linha em branco, com frases de tamanhos variados para dar ritmo.',
+    '',
+    'TOM: ' + t + '.',
+    'TAMANHO: ' + lenFromWords(minutes * WPM) + '.',
+    extra ? 'PEDIDOS EXTRAS: ' + extra : null,
+    '',
+    'FORMATO DA RESPOSTA (importante)',
+    'A primeira linha deve ser "TÍTULO: " seguido de um título curto e atraente para o episódio. Depois, uma linha em branco e somente o texto do roteiro. Não escreva introdução como "Claro!", nem comentários ou perguntas no final.'
+  ].filter((l) => l !== null).join('\n');
 }
 // </PURE>
 
+const APP_VERSION = 'v7';
+
 /* ============================================================
-   Logs avançados (botão 📖): guardam o que aconteceu, sem a chave
+   Logs avançados (botão 📖)
    ============================================================ */
-const APP_VERSION = 'v6';
 const LOG = (() => {
   const MAX = 1200, KEEP = 400;
   const store = (() => { try { return window.localStorage; } catch (e) { return null; } })();
@@ -489,13 +481,6 @@ const LOG = (() => {
   let buf = [];
   try { buf = JSON.parse(store.getItem('applog') || '[]'); if (!Array.isArray(buf)) buf = []; } catch (e) { buf = []; }
   let timer = null;
-  const secret = () => { try { return store.getItem('gk') || ''; } catch (e) { return ''; } };
-  const redact = (s) => {
-    s = String(s);
-    const k = secret();
-    if (k && k.length > 6) s = s.split(k).join('[CHAVE]');
-    return s.replace(/AIza[\w-]{20,}/g, '[CHAVE]').replace(/(key=)[^&\s"']+/gi, '$1[CHAVE]');
-  };
   const fmt = (v) => {
     if (v === undefined) return '';
     if (v instanceof Error) return v.name + ': ' + v.message + (v.stack ? ' | ' + v.stack.split('\n').slice(0, 4).join(' < ') : '');
@@ -508,7 +493,7 @@ const LOG = (() => {
     catch (e) { try { store.removeItem('applog'); } catch (x) { /* ok */ } }
   }
   function add(level, tag, msg, data) {
-    let text = redact(fmt(msg) + (data !== undefined ? ' ' + fmt(data) : ''));
+    let text = fmt(msg) + (data !== undefined ? ' ' + fmt(data) : '');
     if (text.length > 1500) text = text.slice(0, 1500) + '…[+' + (text.length - 1500) + ']';
     buf.push([Date.now(), session, level, tag, text]);
     if (buf.length > MAX) buf.splice(0, buf.length - MAX);
@@ -517,7 +502,7 @@ const LOG = (() => {
   return {
     d: (t, m, x) => add('D', t, m, x), i: (t, m, x) => add('I', t, m, x),
     w: (t, m, x) => add('W', t, m, x), e: (t, m, x) => add('E', t, m, x),
-    all: () => buf, flush: save, fmt, redact, session,
+    all: () => buf, flush: save, fmt, session,
     clear() { buf = []; save(); }
   };
 })();
@@ -536,21 +521,12 @@ window.addEventListener('pagehide', () => { LOG.i('app', 'pagehide'); LOG.flush(
 LOG.i('app', 'página aberta (sessão s' + LOG.session + ')');
 
 /* ============================================================
-   Estado e configurações
+   Estado e utilidades
    ============================================================ */
 const $ = (s) => document.querySelector(s);
 const LS = {
   get(k, d) { try { const v = localStorage.getItem(k); return v === null ? d : v; } catch (e) { return d; } },
   set(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* ignora */ } }
-};
-const API = 'https://generativelanguage.googleapis.com/v1beta';
-const S = {
-  key: LS.get('gk', ''),
-  textModel: LS.get('textModel', 'gemini-3.8-flash'),
-  ttsModel: LS.get('ttsModel', 'gemini-3.8-flash-tts'),
-  voice: LS.get('voice', 'Charon'),
-  engine: LS.get('engine', 'piper'),
-  pvoice: LS.get('pvoice', 'pt_BR-faber-medium')
 };
 const PIPER_VOICES = [
   ['pt_BR-faber-medium', 'Faber, masculina natural (recomendada)'],
@@ -558,54 +534,15 @@ const PIPER_VOICES = [
   ['pt_BR-jeff-medium', 'Jeff, masculina'],
   ['pt_BR-edresson-low', 'Edresson, masculina (mais leve e rápida)']
 ];
-// Migração: modelos antigos ou errados guardados por versões anteriores do app
-if (!/^gemini-\d+(\.\d+)?-(flash|pro)/.test(S.textModel) || /omni|tts|^gemini-[12]\./.test(S.textModel)) { S.textModel = 'gemini-3.8-flash'; LS.set('textModel', S.textModel); }
-if (!/tts/.test(S.ttsModel) || /omni|^gemini-[12]\./.test(S.ttsModel)) { S.ttsModel = 'gemini-3.8-flash-tts'; LS.set('ttsModel', S.ttsModel); }
-function voiceName() { return S.engine === 'piper' ? S.pvoice : S.voice; }
+const S = { pvoice: LS.get('pvoice', 'pt_BR-faber-medium') };
+if (!PIPER_VOICES.some((v) => v[0] === S.pvoice)) S.pvoice = PIPER_VOICES[0][0];
 
-const VOICES = [
-  ['Charon', 'Charon, informativo'], ['Orus', 'Orus, firme'], ['Puck', 'Puck, animado'],
-  ['Fenrir', 'Fenrir, empolgado'], ['Iapetus', 'Iapetus, claro'], ['Umbriel', 'Umbriel, tranquilo'],
-  ['Algieba', 'Algieba, suave'], ['Alnilam', 'Alnilam, firme'], ['Schedar', 'Schedar, equilibrado'],
-  ['Achird', 'Achird, amigável'], ['Zubenelgenubi', 'Zubenelgenubi, casual'], ['Sadachbia', 'Sadachbia, vivo'],
-  ['Sadaltager', 'Sadaltager, conhecedor'], ['Rasalgethi', 'Rasalgethi, informativo'],
-  ['Enceladus', 'Enceladus, suave e baixo'], ['Algenib', 'Algenib, grave e rouco']
-];
-
-const TONES = {
-  neutro: ['Conversa de podcast', 'tom conversacional, caloroso e claro, como um apresentador experiente falando com um ouvinte'],
-  genz: ['Como a Geração Z explicaria', 'linguagem da Geração Z: informal, ritmo rápido, gírias brasileiras atuais com moderação, comparações com memes e com o dia a dia, sem forçar e sem ficar confuso'],
-  tecnico: ['Mais técnico', 'tom técnico e preciso, com os termos corretos e a explicação do porquê das coisas, para quem já tem alguma base'],
-  didatico: ['Didático para iniciantes', 'tom didático, passo a passo, com analogias simples e sem pressupor conhecimento prévio'],
-  humor: ['Bem-humorado', 'tom leve e bem-humorado, com piadas curtas e ironia gentil, sem perder o conteúdo'],
-  narrativo: ['Contando uma história', 'estilo narrativo de storytelling, com curiosidade, tensão e ganchos entre os blocos'],
-  formal: ['Formal e jornalístico', 'tom formal e jornalístico, objetivo e sóbrio']
-};
-
-const SYSTEM_PROMPT = `Você é roteirista e apresentador de um podcast brasileiro narrado por UMA pessoa só, um homem. Seu trabalho é transformar o conteúdo de um vídeo do YouTube em um roteiro falado, que será lido em voz alta por um sintetizador de voz.
-
-Regras:
-- Português do Brasil, natural, como quem fala ao microfone para o ouvinte (trate o ouvinte por "você").
-- Um único apresentador. Nada de diálogo, entrevistado, co-apresentador ou troca de falas.
-- Seja fiel ao vídeo: não invente fatos, números, nomes ou citações. Se algo não estiver claro, deixe de fora ou diga com honestidade que não ficou claro.
-- Se o vídeo estiver em outro idioma, traduza as ideias para o português do Brasil.
-- Estrutura: uma abertura que prende a atenção, a apresentação do assunto (cite o canal e o título se souber), o desenvolvimento em blocos com transições naturais e um fechamento que resume os pontos principais.
-- A saída precisa ser 100% falável: sem markdown, sem listas, sem asteriscos, sem emojis, sem hashtags, sem indicações de cena ou de som entre colchetes ou parênteses, sem marcações de tempo.
-- Escreva números, siglas e símbolos do jeito que se fala (por exemplo, "R$ 5" vira "cinco reais" e "50%" vira "cinquenta por cento"). Evite ler endereços de internet.
-- Parágrafos curtos separados por uma linha em branco, com frases de tamanhos variados para dar ritmo.
-- Formato da resposta: a primeira linha é "TÍTULO: " seguido de um título curto e atraente para o episódio, depois uma linha em branco e depois somente o texto do roteiro. Não escreva mais nada além disso.`;
-
-const TTS_STYLE = 'Em português do Brasil, com voz masculina natural, ritmo de conversa e pausas naturais entre as frases, como um apresentador de podcast: ';
-
-let ctl = null;                 // AbortController da tarefa atual
+let ctl = null;
 let busy = false;
-let partial = { key: '', pcm: [], rate: 24000 };   // trechos de voz já prontos (para retomar)
+let partial = { key: '', pcm: [], rate: 24000 };
 let eps = [];
 let cur = { id: null, url: null };
 
-/* ============================================================
-   Interface: barra de progresso 0–100%
-   ============================================================ */
 class Progress {
   constructor(el, onCancel) {
     this.el = el; this.name = el.id;
@@ -622,10 +559,10 @@ class Progress {
     this.btn.hidden = !onCancel;
     this.last = 0;
   }
-  show(label) { this.el.hidden = false; this.set(0, '', label); }
+  show(label) { this.el.hidden = false; this.last = 0; this.set(0, '', label); }
   set(p, note, label) {
     p = Math.max(0, Math.min(100, Math.round(p)));
-    if (p < this.last && p !== 0) p = this.last;      // a barra nunca anda para trás
+    if (p < this.last && p !== 0) p = this.last;
     this.last = p;
     if (label !== undefined && label !== this.lab) { this.lab = label; LOG.d('barra', this.name + ' · ' + label + ' ' + p + '%'); }
     else if (Math.floor(p / 20) !== this.stp) { this.stp = Math.floor(p / 20); LOG.d('barra', this.name + ' ' + p + '%' + (note ? ' · ' + note : '')); }
@@ -636,16 +573,14 @@ class Progress {
     if (note !== undefined) this.note.textContent = note;
   }
   hide() { this.el.hidden = true; this.last = 0; }
-  // devolve uma função que mapeia 0–100 para uma faixa [a, b] da barra
   sub(a, b) { return (p, note, label) => this.set(a + (b - a) * p / 100, note, label); }
 }
 function cancelTask() { if (ctl) ctl.abort(); }
-const pQuick = new Progress($('#progQuick'), cancelTask);
-const pScript = new Progress($('#progScript'), cancelTask);
-const pRevise = new Progress($('#progRevise'), cancelTask);
 const pAudio = new Progress($('#progAudio'), cancelTask);
 const pLoad = new Progress($('#progLoad'), null);
-const pModels = new Progress($('#progModels'), null);
+const pClear = new Progress($('#progClear'), null);
+const pUpd = new Progress($('#progUpd'), null);
+const pLog = new Progress($('#progLog'), null);
 
 function banner(msg, kind) {
   const b = $('#banner');
@@ -670,282 +605,33 @@ document.addEventListener('visibilitychange', () => { if (document.visibilitySta
 function lock(on) {
   busy = on;
   if (on) wakeOn(); else wakeOff();
-  document.querySelectorAll('[data-act]').forEach((b) => { b.disabled = on || !navigator.onLine; });
+  document.querySelectorAll('#btnAudio, #btnClearAudio, #btnClearVoice, #btnLive').forEach((b) => { b.disabled = on; });
 }
 function esc(s) {
   return String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
-function sleep(ms, signal) {
-  return new Promise((res, rej) => {
-    const t = setTimeout(res, ms);
-    if (signal) signal.addEventListener('abort', () => { clearTimeout(t); rej(new DOMException('Cancelado', 'AbortError')); }, { once: true });
-  });
-}
-
-/* ============================================================
-   Gemini: requisições com espera automática no limite gratuito
-   ============================================================ */
-function friendly(err) {
-  const m = err.msg || '';
-  if (err.status === 400 && /API key/i.test(m)) return 'Chave de API inválida. Confira a chave nos Ajustes.';
-  if (err.status === 401 || err.status === 403) {
-    if (/YouTube|video/i.test(m)) return 'O Gemini não conseguiu acessar este vídeo. Ele precisa ser público ou não listado.';
-    return 'O Gemini recusou a chave (' + err.status + '). Confira a chave nos Ajustes e se a API está liberada na sua conta.';
-  }
-  if (err.status === 404) return 'Modelo não encontrado (' + (m.match(/models\/[\w.\-]+/) || ['?'])[0] + '). Abra Ajustes e toque em Detectar modelos disponíveis.';
-  if (err.status === 400 && /YouTube|video|URL/i.test(m)) return 'O Gemini não conseguiu abrir este vídeo. Ele precisa ser público, sem restrição de idade, e não pode ser uma transmissão ao vivo em andamento.';
-  if (err.status === 429) {
-    return err.daily
-      ? 'O limite gratuito do Gemini acabou (ou este modelo não está liberado no plano gratuito). Os limites zeram por dia; tente mais tarde ou troque o modelo em Ajustes.'
-      : 'O Gemini está limitando as requisições. Tente de novo em instantes.';
-  }
-  return 'Erro do Gemini (' + err.status + '): ' + (m || 'sem detalhes') ;
-}
-
-async function countdown(sec, label, onWait, signal) {
-  for (let s = Math.ceil(sec); s > 0; s--) {
-    onWait && onWait(label + ' ' + s + ' s');
-    await sleep(1000, signal);
-  }
-  onWait && onWait('');
-}
-
-async function gem(path, body, { signal, onWait, tries = 5, fast = false } = {}) {
-  let attempt = 0;
-  const name = path.split('?')[0];
-  const payload = JSON.stringify(body);
-  for (;;) {
-    let res;
-    const t0 = performance.now();
-    LOG.i('gem', 'POST ' + name + (attempt ? ' tentativa ' + (attempt + 1) : '') + ' | corpo ' + Math.round(payload.length / 1024) + ' KB');
-    try {
-      res = await fetch(API + path, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': S.key },
-        body: payload,
-        signal
-      });
-    } catch (e) {
-      LOG.e('gem', 'falha de rede, CORS ou cancelamento após ' + Math.round(performance.now() - t0) + ' ms', e);
-      if (e.name === 'AbortError') throw e;
-      throw new Error('Sem conexão com o Gemini. Verifique sua internet e tente de novo.');
-    }
-    const ms = Math.round(performance.now() - t0);
-    if (res.ok) { LOG.i('gem', 'HTTP ' + res.status + ' em ' + ms + ' ms (cabeçalhos recebidos)'); return res; }
-    const raw = await res.text();
-    const err = readApiError(res.status, raw);
-    LOG.w('gem', 'HTTP ' + res.status + ' em ' + ms + ' ms', raw.slice(0, 700));
-    const transient = res.status === 429 || res.status === 500 || res.status === 503;
-    if (fast && transient) {
-      const fx = new Error(friendly(err));
-      fx.status = res.status; fx.apiMsg = err.msg; fx.daily = err.daily; fx.retry = err.retry; fx.transient = true;
-      throw fx;
-    }
-    if (transient && attempt < tries && !err.daily) {
-      attempt++;
-      if (res.status === 429) {
-        const w = Math.min(Math.max(err.retry || 20, 5), 75);
-        LOG.i('gem', 'limite: esperando ' + w + ' s');
-        await countdown(w, 'Limite gratuito do Gemini, retomando em', onWait, signal);
-      } else {
-        LOG.i('gem', 'servidor ocupado: esperando ' + 4 * attempt + ' s');
-        await countdown(4 * attempt, 'Gemini ocupado, nova tentativa em', onWait, signal);
-      }
-      continue;
-    }
-    const ex = new Error(friendly(err));
-    ex.status = res.status; ex.apiMsg = err.msg; ex.daily = err.daily;
-    throw ex;
-  }
-}
-
-/* Se o modelo não existe (404) ou não está liberado no plano gratuito (429 com limite 0),
-   o app tenta sozinho o próximo da lista, do melhor para o pior, e guarda o que funcionar. */
-const modelCache = {};
-async function nextModel(kind, tried, apiMsg) {
-  const sug = (/models\/([\w.\-]+)/.exec(String(apiMsg || '').replace('models/' + tried[tried.length - 1], '')) || [])[1];
-  if (sug && /^gemini-\d/.test(sug) && !tried.includes(sug) && (kind === 'tts') === /tts/.test(sug) && !/omni/.test(sug)) return sug;
-  if (!modelCache[kind]) {
-    try {
-      const res = await fetch(API + '/models?pageSize=1000', { headers: { 'x-goog-api-key': S.key } });
-      if (res.ok) {
-        const j = await res.json();
-        const names = (j.models || []).filter((m) => (m.supportedGenerationMethods || []).includes('generateContent')).map((m) => m.name.replace(/^models\//, ''));
-        modelCache[kind] = rankModels(kind, names);
-        LOG.i('modelos', 'candidatos (' + kind + '): ' + modelCache[kind].join(', '));
-      }
-    } catch (e) { LOG.e('modelos', 'não consegui listar modelos', e); }
-  }
-  return (modelCache[kind] || []).find((n) => !tried.includes(n)) || '';
-}
-async function gemModelRetry(kind, pathFor, body, o) {
-  o = o || {};
-  const start = kind === 'tts' ? S.ttsModel : S.textModel;
-  const tried = [];
-  let model = start, startPermanent = false, waits = 0;
-  for (let k = 0; k < 10; k++) {
-    if (!tried.includes(model)) tried.push(model);
-    try {
-      const res = await gem(pathFor(model), body, Object.assign({}, o, { fast: true }));
-      if (model !== start) {
-        LOG.w('modelos', 'funcionou com ' + model + ' (inicial: ' + start + ')');
-        if (startPermanent) {   // o modelo inicial não serve mesmo: guarda o que funcionou
-          if (kind === 'tts') { S.ttsModel = model; LS.set('ttsModel', model); } else { S.textModel = model; LS.set('textModel', model); }
-        }
-      }
-      return res;
-    } catch (e) {
-      if (e.name === 'AbortError') throw e;
-      const permanent = e.status === 404 || (e.status === 429 && e.daily);
-      const transient = e.transient || e.status === 429 || e.status === 500 || e.status === 503;
-      if (!permanent && !transient) throw e;
-      if (model === start && permanent) startPermanent = true;
-      LOG.w('modelos', model + (permanent ? ' não serve' : ' ocupado') + ' (HTTP ' + e.status + '), tentando outro');
-      const next = await nextModel(kind, tried, e.apiMsg);
-      if (next) {
-        if (o.onWait) o.onWait((permanent ? 'Modelo indisponível' : 'Modelo ocupado') + ', trocando para ' + next + '…');
-        model = next;
-        continue;
-      }
-      if (permanent || waits >= 3) {
-        e.message = 'Nenhum modelo do Gemini respondeu agora (testei: ' + tried.join(', ') + '). Tente de novo em alguns minutos.';
-        throw e;
-      }
-      waits++;
-      const w = Math.min(Math.max(e.retry || 6 * waits, 5), 60);
-      await countdown(w, 'Gemini ocupado, tentando de novo em', o.onWait, o.signal);
-      tried.length = 0;
-      model = start;
-    }
-  }
-  throw new Error('Nenhum modelo do Gemini respondeu (testei: ' + tried.join(', ') + '). Tente de novo em alguns minutos.');
-}
-
-/* ============================================================
-   Roteiro (Gemini lê o vídeo e escreve)
-   ============================================================ */
-function lenFromWords(w) {
-  w = Math.round(w / 10) * 10;
-  return 'aproximadamente ' + w + ' palavras (cerca de ' + fmtMin(w / WPM) + ' de áudio falado, a ~' + WPM + ' palavras por minuto), com margem de 10%';
-}
-function lenFromMinutes(m) { return m ? lenFromWords(m * WPM) : 'escolha entre 3 e 8 minutos de áudio (cerca de 450 a 1200 palavras), conforme a riqueza do conteúdo'; }
-
-// opts: mode 'new' | 'revise'; url; tone; lenText; extra; prev; instruction; withVideo; expectWords
-async function generateScript(opts, signal, onProgress) {
-  const parts = [];
-  if (opts.withVideo) parts.push({ fileData: { fileUri: opts.url } });
-  let prompt;
-  const toneTxt = TONES[opts.tone] ? TONES[opts.tone][1] : '';
-  if (opts.mode === 'new') {
-    prompt = 'Crie o roteiro do podcast sobre o vídeo anexo.\n' +
-      (toneTxt ? 'Tom: ' + toneTxt + '.\n' : '') +
-      'Tamanho: ' + opts.lenText + '.\n' +
-      (opts.extra ? 'Pedidos do usuário, que devem ser seguidos: ' + opts.extra + '\n' : '');
-  } else {
-    prompt = 'Abaixo está o roteiro atual do podcast' + (opts.withVideo ? ' (o vídeo original está anexo para consulta)' : '') + '. ' +
-      'Reescreva-o aplicando o pedido do usuário e mantendo todas as regras de formato e de fidelidade.\n\n' +
-      'PEDIDO DO USUÁRIO: ' + opts.instruction + '\n' +
-      (toneTxt ? 'Tom desejado: ' + toneTxt + '.\n' : '') +
-      'Tamanho: ' + opts.lenText + '.\n\nROTEIRO ATUAL:\n' + opts.prev;
-  }
-  parts.push({ text: prompt });
-
-  const body = {
-    systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
-    contents: [{ role: 'user', parts }],
-    generationConfig: { temperature: 0.8 }
-  };
-
-  let pct = 0, first = false, waitMsg = '';
-  const t0 = Date.now();
-  LOG.i('roteiro', 'início', { modo: opts.mode, tom: opts.tone, comVideo: !!opts.withVideo, tamanho: String(opts.lenText || '').slice(0, 70), modelo: S.textModel, video: opts.url || '' });
-  const label = opts.withVideo ? 'Entendendo o vídeo' : 'Reescrevendo o roteiro';
-  const tick = setInterval(() => {
-    if (first) return;
-    const s = (Date.now() - t0) / 1000;
-    pct = 12 * (1 - Math.exp(-s / 10));
-    onProgress(pct, waitMsg || (opts.withVideo ? 'O Gemini está assistindo ao vídeo…' : 'Pensando no novo texto…'), label);
-  }, 400);
-
-  let text = '', lastUsage = null;
+async function copyText(t) {
+  try { await navigator.clipboard.writeText(t); return true; } catch (e) { /* método antigo */ }
   try {
-    onProgress(0, 'Enviando para o Gemini…', label);
-    const res = await gemModelRetry('text', (m) => '/models/' + m + ':streamGenerateContent?alt=sse', body, {
-      signal, onWait: (m) => { waitMsg = m; if (m) onProgress(pct, m, label); }
-    });
-    waitMsg = '';
-    const reader = res.body.getReader();
-    const dec = new TextDecoder();
-    let buf = '';
-    const expectChars = Math.max(300, (opts.expectWords || 800) * 6.3);
-    const eat = (line) => {
-      line = line.replace(/\r$/, '');
-      if (!line.startsWith('data:')) return;
-      const j = line.slice(5).trim();
-      if (!j || j === '[DONE]') return;
-      let o;
-      try { o = JSON.parse(j); } catch (e) { return; }
-      if (o.promptFeedback && o.promptFeedback.blockReason) {
-        throw new Error('O Gemini bloqueou este pedido (' + o.promptFeedback.blockReason + '). Tente outro vídeo.');
-      }
-      const ps = (o.candidates && o.candidates[0] && o.candidates[0].content && o.candidates[0].content.parts) || [];
-      for (const p of ps) if (p.text && !p.thought) text += p.text;
-      const fr = o.candidates && o.candidates[0] && o.candidates[0].finishReason;
-      if (fr && fr !== 'STOP') LOG.w('roteiro', 'finishReason=' + fr);
-      if (o.usageMetadata) lastUsage = o.usageMetadata;
-    };
-    for (;;) {
-      const { value, done } = await reader.read();
-      if (done) break;
-      buf += dec.decode(value, { stream: true });
-      let i;
-      while ((i = buf.indexOf('\n')) >= 0) { eat(buf.slice(0, i)); buf = buf.slice(i + 1); }
-      if (text) {
-        if (!first) LOG.i('roteiro', 'primeiro texto após ' + (Date.now() - t0) + ' ms');
-        first = true;
-        pct = 12 + 86 * Math.min(1, text.length / expectChars);
-        onProgress(pct, 'Escrevendo o roteiro… ' + wordCount(text) + ' palavras', label);
-      }
-    }
-    if (buf) eat(buf);
-  } finally {
-    clearInterval(tick);
-  }
-
-  const out = parseScript(text);
-  LOG.i('roteiro', 'fim em ' + (Date.now() - t0) + ' ms: ' + wordCount(out.script) + ' palavras, título="' + out.title + '"', lastUsage || undefined);
-  if (wordCount(out.script) < 30) LOG.e('roteiro', 'texto curto demais; bruto=' + text.slice(0, 300));
-  if (wordCount(out.script) < 30) {
-    throw new Error('O Gemini não devolveu um roteiro. O vídeo pode estar privado, com restrição de idade ou sem acesso. Tente outro vídeo.');
-  }
-  onProgress(100, wordCount(out.script) + ' palavras', label);
-  return out;
+    const ta = document.createElement('textarea');
+    ta.value = t; ta.setAttribute('readonly', '');
+    ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0';
+    document.body.appendChild(ta);
+    ta.select(); ta.setSelectionRange(0, t.length);
+    const ok = document.execCommand('copy');
+    ta.remove();
+    return ok;
+  } catch (e) { return false; }
+}
+function failure(e, ...bars) {
+  bars.forEach((b) => b.hide());
+  if (e && e.name === 'AbortError') { LOG.i('falha', 'cancelado pelo usuário'); banner('Cancelado.', 'info'); }
+  else { LOG.e('falha', e); banner((e && e.message) || 'Algo deu errado.', 'err'); }
 }
 
 /* ============================================================
-   Voz (Gemini TTS) e áudio
+   Piper: voz neural que roda no próprio aparelho (WebAssembly)
    ============================================================ */
-async function ttsChunk(text, signal, onWait) {
-  const body = {
-    contents: [{ parts: [{ text: TTS_STYLE + text }] }],
-    generationConfig: {
-      responseModalities: ['AUDIO'],
-      speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: S.voice } } }
-    }
-  };
-  for (let t = 0; t < 3; t++) {
-    const res = await gemModelRetry('tts', (m) => '/models/' + m + ':generateContent', body, { signal, onWait });
-    const j = await res.json();
-    const parts = (j.candidates && j.candidates[0] && j.candidates[0].content && j.candidates[0].content.parts) || [];
-    const p = parts.find((x) => x.inlineData && x.inlineData.data);
-    if (p) { LOG.i('tts', 'áudio recebido: ' + Math.round(p.inlineData.data.length * 0.75 / 1024) + ' KB, ' + p.inlineData.mimeType); return { pcm: b64ToBytes(p.inlineData.data), rate: parseRate(p.inlineData.mimeType) }; }
-    LOG.w('tts', 'resposta sem áudio (tentativa ' + (t + 1) + ')', JSON.stringify(j).slice(0, 400));
-    await sleep(2000, signal);
-  }
-  throw new Error('A voz não devolveu áudio para um trecho. Toque em gerar de novo: o que já ficou pronto é reaproveitado.');
-}
-
-/* ---- Piper: voz neural que roda no próprio aparelho (WebAssembly), sem cota ---- */
 let piperMod = null, piperSession = null, piperSessionVoice = '';
 async function loadPiper() {
   if (piperMod) return piperMod;
@@ -958,7 +644,7 @@ async function loadPiper() {
     try { piperMod = await import(u); LOG.i('piper', 'motor carregado de ' + u + ' em ' + Math.round(performance.now() - t0) + ' ms', Object.keys(piperMod)); return piperMod; }
     catch (e) { LOG.e('piper', 'falha ao carregar ' + u + ' após ' + Math.round(performance.now() - t0) + ' ms', e); }
   }
-  throw new Error('Não consegui carregar o motor de voz offline. Conecte à internet na primeira vez (depois ele fica guardado) ou troque para a voz do Gemini.');
+  throw new Error('Não consegui carregar o motor de voz. Conecte à internet na primeira vez (depois ele fica guardado) e tente de novo.');
 }
 async function preparePiper(voiceId, onProgress) {
   const tts = await loadPiper();
@@ -1007,37 +693,32 @@ async function piperChunk(text, signal) {
 }
 
 async function makeAudio(script, signal, onProgress) {
-  const piper = S.engine === 'piper';
-  const chunks = chunkScript(script, piper ? 420 : 2000);
+  const chunks = chunkScript(script, 420);
   const n = chunks.length;
-  LOG.i('audio', 'início: motor=' + S.engine + ' voz=' + voiceName() + ' trechos=' + n + ' caracteres=' + script.length + ' (retomando de ' + (partial.key === (S.engine + '|' + (piper ? S.pvoice : S.ttsModel + '|' + S.voice) + '|' + script) ? partial.pcm.length : 0) + ')');
-  const key = S.engine + '|' + (piper ? S.pvoice : S.ttsModel + '|' + S.voice) + '|' + script;
+  const key = S.pvoice + '|' + script;
   if (partial.key !== key) partial = { key, pcm: [], rate: 24000 };
-  let base = 0;
-  if (piper) {
-    onProgress(0, 'Preparando a voz…', 'Preparando a voz');
-    const downloaded = await preparePiper(S.pvoice, (p, note) => onProgress(p * 0.25, note, 'Baixando a voz'));
-    base = downloaded ? 25 : 0;
-  }
+  LOG.i('audio', 'início: voz=' + S.pvoice + ' trechos=' + n + ' caracteres=' + script.length + ' (retomando de ' + partial.pcm.length + ')');
+  onProgress(0, 'Preparando a voz…', 'Preparando a voz');
+  const downloaded = await preparePiper(S.pvoice, (p, note) => onProgress(p * 0.25, note, 'Baixando a voz'));
+  const base = downloaded ? 25 : 0;
   const span = 100 - base;
   for (let i = partial.pcm.length; i < n; i++) {
     const t0 = Date.now();
-    let waiting = '';
     const label = 'Gerando a voz';
     const tick = setInterval(() => {
       const s = (Date.now() - t0) / 1000;
-      const part = 0.9 * (1 - Math.exp(-s / (piper ? 6 : 20)));
-      onProgress(base + span * (i + part) / n, waiting || ('Gravando o trecho ' + (i + 1) + ' de ' + n), label);
+      const part = 0.9 * (1 - Math.exp(-s / 6));
+      onProgress(base + span * (i + part) / n, 'Gravando o trecho ' + (i + 1) + ' de ' + n, label);
     }, 400);
     try {
-      const r = piper ? await piperChunk(chunks[i], signal) : await ttsChunk(chunks[i], signal, (m) => { waiting = m; });
+      const r = await piperChunk(chunks[i], signal);
       partial.pcm.push(r.pcm);
       partial.rate = r.rate;
       LOG.i('audio', 'trecho ' + (i + 1) + '/' + n + ' pronto em ' + (Date.now() - t0) + ' ms (' + chunks[i].length + ' car → ' + (r.pcm.length / 2 / r.rate).toFixed(1) + ' s de áudio)');
     } finally { clearInterval(tick); }
     onProgress(base + span * (i + 1) / n, 'Trecho ' + (i + 1) + ' de ' + n + ' pronto', label);
   }
-  const wav = buildWav(partial.pcm, partial.rate, piper ? 0.18 : 0.35);
+  const wav = buildWav(partial.pcm, partial.rate, 0.18);
   LOG.i('audio', 'WAV final: ' + wav.duration.toFixed(1) + ' s, ' + fmtBytes(wav.bytes));
   partial = { key: '', pcm: [], rate: 24000 };
   return wav;
@@ -1101,7 +782,8 @@ const DB = (() => {
     put: (s, v) => tx(s, 'readwrite', (o) => o.put(v)),
     get: (s, k) => tx(s, 'readonly', (o) => o.get(k)),
     all: (s) => tx(s, 'readonly', (o) => o.getAll()),
-    del: (s, k) => tx(s, 'readwrite', (o) => o.delete(k))
+    del: (s, k) => tx(s, 'readwrite', (o) => o.delete(k)),
+    clear: (s) => tx(s, 'readwrite', (o) => o.clear())
   };
 })();
 
@@ -1121,25 +803,41 @@ async function saveEpisode(meta, wav) {
 }
 
 async function loadLibrary() {
-  try { eps = (await DB.all('eps')).sort((a, b) => b.createdAt - a.createdAt); } catch (e) { eps = []; }
+  try { eps = (await DB.all('eps')).sort((a, b) => b.createdAt - a.createdAt); } catch (e) { eps = []; LOG.e('biblioteca', e); }
   const list = $('#list');
-  if (!eps.length) { list.innerHTML = '<p class="empty">Nenhum episódio ainda. Cole um link acima e gere o primeiro.</p>'; }
+  if (!eps.length) { list.innerHTML = '<p class="empty">Nenhum episódio ainda. Siga os 3 passos acima.</p>'; }
   else {
     list.innerHTML = eps.map((e) =>
       '<div class="ep" data-id="' + e.id + '"><h3>' + esc(e.title || 'Sem título') + '</h3>' +
       '<div class="m">' + fmtTime(e.duration) + ' · ' + fmtBytes(e.bytes) + ' · ' + new Date(e.createdAt).toLocaleDateString('pt-BR') + ' · salvo offline</div>' +
       '<div class="btns"><button type="button" data-a="play">Ouvir</button><button type="button" data-a="script">Roteiro</button>' +
-      '<button type="button" data-a="dl">Baixar</button><button type="button" data-a="del">Excluir</button></div></div>'
+      '<button type="button" data-a="dl">Baixar</button><button type="button" data-a="del">Apagar</button></div></div>'
     ).join('');
   }
-  try {
-    if (navigator.storage && navigator.storage.estimate) {
-      const est = await navigator.storage.estimate();
-      const u = $('#usage');
-      u.textContent = fmtBytes(est.usage || 0) + ' usados';
-      u.hidden = false;
-    }
-  } catch (e) { /* ok */ }
+  await refreshUsage();
+}
+async function refreshUsage() {
+  const audioBytes = eps.reduce((s, e) => s + (e.bytes || 0), 0);
+  let usage = audioBytes;
+  try { if (navigator.storage && navigator.storage.estimate) usage = (await navigator.storage.estimate()).usage || audioBytes; } catch (e) { /* ok */ }
+  const other = Math.max(0, usage - audioBytes);
+  const total = Math.max(1, audioBytes + other);
+  $('#uAudio').textContent = fmtBytes(audioBytes);
+  $('#uOther').textContent = fmtBytes(other);
+  $('#barAudio').style.width = (audioBytes / total * 100) + '%';
+  $('#barOther').style.width = (other / total * 100) + '%';
+}
+
+async function removeEpisode(id) {
+  await DB.del('eps', id);
+  await DB.del('audio', id);
+  if (cur.id === id) {
+    audio.pause(); audio.removeAttribute('src'); audio.load();
+    if (cur.url) URL.revokeObjectURL(cur.url);
+    $('#playerCard').hidden = true; cur = { id: null, url: null };
+  }
+  LOG.i('biblioteca', 'episódio apagado ' + id);
+  await loadLibrary();
 }
 
 /* ============================================================
@@ -1195,7 +893,13 @@ audio.addEventListener('loadedmetadata', updateSeek);
 audio.addEventListener('play', () => { $('#btnPlay').textContent = '❚❚'; $('#btnPlay').setAttribute('aria-label', 'Pausar'); });
 audio.addEventListener('pause', () => { $('#btnPlay').textContent = '▶'; $('#btnPlay').setAttribute('aria-label', 'Tocar'); });
 audio.addEventListener('error', () => LOG.e('player', 'erro no <audio>: código ' + (audio.error && audio.error.code) + ' ' + (audio.error && audio.error.message)));
-audio.addEventListener('ended', () => { $('#btnPlay').textContent = '▶'; });
+audio.addEventListener('ended', async () => {
+  $('#btnPlay').textContent = '▶';
+  if (LS.get('autodel', '0') === '1' && cur.id) {
+    const id = cur.id;
+    try { await removeEpisode(id); banner('Episódio apagado depois de ouvir.', 'ok'); } catch (e) { LOG.e('autodel', e); }
+  }
+});
 $('#btnPlay').addEventListener('click', () => { if (!audio.src) return; audio.paused ? audio.play() : audio.pause(); });
 $('#btnBack').addEventListener('click', () => { audio.currentTime = Math.max(0, audio.currentTime - 15); });
 $('#btnFwd').addEventListener('click', () => { audio.currentTime = Math.min(audio.duration || 0, audio.currentTime + 30); });
@@ -1241,285 +945,39 @@ $('#list').addEventListener('click', async (ev) => {
   if (a === 'play') openEpisode(id, true);
   else if (a === 'dl') downloadEpisode(id);
   else if (a === 'del') {
-    if (!confirm('Excluir este episódio do aparelho?')) return;
-    await DB.del('eps', id); await DB.del('audio', id);
-    if (cur.id === id) { audio.pause(); audio.removeAttribute('src'); audio.load(); $('#playerCard').hidden = true; cur = { id: null, url: null }; }
-    loadLibrary();
+    if (!confirm('Apagar este episódio do aparelho?')) return;
+    await removeEpisode(id);
   } else if (a === 'script') {
     const e = eps.find((x) => x.id === id);
     if (!e) return;
-    setMode('adv');
     if (e.url) { $('#url').value = e.url; onUrlInput(); }
-    showEditor(e.title, e.script);
-    $('#editor').scrollIntoView({ behavior: 'smooth' });
+    $('#title').value = e.title || '';
+    $('#script').value = e.script || '';
+    updateStats();
+    $('#script').scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
 });
 
 /* ============================================================
-   Fluxos: rápido e avançado
+   Passo 1: prompt
    ============================================================ */
-function currentVideo() {
+function currentPrompt() {
   const id = ytId($('#url').value);
-  if (!id) { banner('Cole um link válido do YouTube (watch, youtu.be ou shorts).', 'err'); $('#url').focus(); return null; }
-  return normUrl(id);
+  return makePrompt({
+    url: id ? normUrl(id) : '[cole o link do vídeo aqui]',
+    tone: $('#tone').value, minutes: +$('#mins').value, extra: $('#extra').value.trim()
+  });
 }
-function needKey() {
-  if (S.key) return true;
-  banner('Antes de começar, cole sua chave do Gemini (grátis) nos Ajustes.', 'err');
-  openSettings();
-  return false;
+function refreshPrompt() {
+  $('#promptView').value = currentPrompt();
+  const m = +$('#mins').value;
+  $('#minsVal').textContent = m + ' min';
+  $('#minsHint').textContent = 'Cerca de ' + Math.round(m * WPM) + ' palavras.';
 }
-function failure(e, ...bars) {
-  bars.forEach((b) => b.hide());
-  if (e && e.name === 'AbortError') LOG.i('falha', 'cancelado pelo usuário'); else LOG.e('falha', e);
-  if (e && e.name === 'AbortError') banner('Cancelado.', 'info');
-  else banner((e && e.message) || 'Algo deu errado.', 'err');
-}
-
-async function runQuick() {
-  banner('');
-  LOG.i('ação', 'modo rápido', { video: $('#url').value, motor: S.engine, voz: voiceName() });
-  const url = currentVideo(); if (!url || !needKey()) return;
-  lock(true); ctl = new AbortController();
-  const signal = ctl.signal;
-  try {
-    pQuick.show('Entendendo o vídeo');
-    const r = await generateScript(
-      { mode: 'new', url, tone: 'neutro', lenText: lenFromMinutes(0), withVideo: true, expectWords: 800 },
-      signal, pQuick.sub(0, 35));
-    const wav = await makeAudio(r.script, signal, pQuick.sub(35, 96));
-    pQuick.set(96, 'Salvando para ouvir offline', 'Salvando');
-    const id = await saveEpisode({ title: r.title || 'Episódio', url, script: r.script, voice: voiceName() }, wav);
-    pQuick.set(100, 'Pronto!', 'Concluído');
-    await loadLibrary();
-    setTimeout(() => pQuick.hide(), 900);
-    banner('Podcast pronto e salvo para ouvir offline.', 'ok');
-    await openEpisode(id, true);
-  } catch (e) { failure(e, pQuick); }
-  finally { lock(false); ctl = null; }
-}
-
-function showEditor(title, script) {
-  $('#editor').hidden = false;
-  $('#title').value = title || '';
-  $('#script').value = script || '';
-  updateStats();
-}
-function updateStats() {
-  const w = wordCount($('#script').value);
-  $('#stWords').textContent = w + ' palavras';
-  $('#stDur').textContent = 'cerca de ' + fmtMin(w / WPM) + ' de áudio';
-  const piper = S.engine === 'piper';
-  const n = chunkScript($('#script').value, piper ? 420 : 2000).length;
-  $('#audioHint').textContent = !w ? '' : piper
-    ? 'A voz roda no seu aparelho, sem limite: ' + n + (n === 1 ? ' trecho' : ' trechos') + '. Gerar leva alguns minutos.'
-    : 'A voz será gerada em ' + n + (n === 1 ? ' trecho' : ' trechos') + ' (1 requisição de voz por trecho).';
-}
-
-async function runScript() {
-  banner('');
-  LOG.i('ação', 'gerar roteiro (avançado)', { tom: $('#tone').value, minutos: $('#mins').value });
-  const url = currentVideo(); if (!url || !needKey()) return;
-  lock(true); ctl = new AbortController();
-  try {
-    const minutes = +$('#mins').value;
-    pScript.show('Entendendo o vídeo');
-    const r = await generateScript({
-      mode: 'new', url, tone: $('#tone').value, lenText: lenFromMinutes(minutes),
-      extra: $('#extra').value.trim(), withVideo: true, expectWords: minutes * WPM
-    }, ctl.signal, (p, n, l) => pScript.set(p, n, l));
-    showEditor(r.title, r.script);
-    setTimeout(() => pScript.hide(), 700);
-    $('#editor').scrollIntoView({ behavior: 'smooth' });
-    banner('Roteiro pronto. Leia, ajuste e gere o áudio quando quiser.', 'ok');
-  } catch (e) { failure(e, pScript); }
-  finally { lock(false); ctl = null; }
-}
-
-async function runRevise({ instruction, tone, words }) {
-  banner('');
-  LOG.i('ação', 'reescrever roteiro', { tom: tone, palavras: words || null, pedido: String(instruction || '').slice(0, 120) });
-  const prev = $('#script').value.trim();
-  if (wordCount(prev) < 20) { banner('Gere ou escreva um roteiro antes de pedir ajustes.', 'err'); return; }
-  if (!instruction) { banner('Escreva seu pedido no campo “Dê seu pitaco”.', 'err'); $('#instr').focus(); return; }
-  if (!needKey()) return;
-  const id = ytId($('#url').value);
-  const withVideo = $('#withVideo').checked && !!id;
-  const cw = wordCount(prev);
-  const target = words || cw;
-  lock(true); ctl = new AbortController();
-  try {
-    pRevise.show('Reescrevendo o roteiro');
-    const r = await generateScript({
-      mode: 'revise', url: id ? normUrl(id) : '', tone, prev, instruction,
-      lenText: words ? lenFromWords(words) : 'mantenha um tamanho parecido com o atual (cerca de ' + cw + ' palavras), a menos que o pedido diga outra coisa',
-      withVideo, expectWords: target
-    }, ctl.signal, (p, n, l) => pRevise.set(p, n, l));
-    showEditor(r.title || $('#title').value, r.script);
-    $('#instr').value = '';
-    setTimeout(() => pRevise.hide(), 700);
-    banner('Roteiro atualizado.', 'ok');
-  } catch (e) { failure(e, pRevise); }
-  finally { lock(false); ctl = null; }
-}
-
-async function runAudio() {
-  banner('');
-  LOG.i('ação', 'gerar áudio (avançado)', { motor: S.engine, voz: voiceName() });
-  const script = sanitizeScript($('#script').value);
-  if (wordCount(script) < 20) { banner('O roteiro está vazio ou muito curto.', 'err'); return; }
-  if (S.engine === 'gemini' && !needKey()) return;
-  lock(true); ctl = new AbortController();
-  const signal = ctl.signal;
-  try {
-    pAudio.show('Gerando a voz');
-    const wav = await makeAudio(script, signal, pAudio.sub(0, 95));
-    pAudio.set(95, 'Salvando para ouvir offline', 'Salvando');
-    const id = await saveEpisode({
-      title: $('#title').value.trim() || 'Episódio', url: ytId($('#url').value) ? normUrl(ytId($('#url').value)) : '',
-      script, voice: voiceName()
-    }, wav);
-    pAudio.set(100, 'Pronto!', 'Concluído');
-    await loadLibrary();
-    setTimeout(() => pAudio.hide(), 900);
-    banner('Áudio pronto e salvo para ouvir offline.', 'ok');
-    await openEpisode(id, true);
-  } catch (e) {
-    const resumable = partial.pcm.length > 0 && !(e && e.name === 'AbortError');
-    failure(e, pAudio);
-    if (resumable) banner(e.message + ' Toque em gerar de novo: os ' + partial.pcm.length + ' trecho(s) já prontos são reaproveitados.', 'err');
-  }
-  finally { lock(false); ctl = null; }
-}
-
-/* ============================================================
-   Ajustes e detecção de modelos
-   ============================================================ */
-function openSettings() {
-  $('#key').value = S.key;
-  $('#textModel').value = S.textModel;
-  $('#ttsModel').value = S.ttsModel;
-  const d = $('#dlg');
-  if (d.showModal) d.showModal(); else d.setAttribute('open', '');
-}
-function pickBest(list, prefer) {
-  const sorted = list.slice().sort((a, b) => b.localeCompare(a, undefined, { numeric: true }));
-  const stable = sorted.filter((n) => !/preview|exp/.test(n));
-  const pool = (prefer ? sorted.filter((n) => prefer.test(n)) : sorted);
-  const poolStable = pool.filter((n) => !/preview|exp/.test(n));
-  return poolStable[0] || pool[0] || stable[0] || sorted[0] || '';
-}
-async function detectModels() {
-  const key = $('#key').value.trim();
-  if (!key) { banner('Cole a chave antes de detectar os modelos.', 'err'); return false; }
-  pModels.show('Buscando modelos');
-  pModels.set(25, 'Consultando o Gemini…');
-  try {
-    const res = await fetch(API + '/models?pageSize=1000', { headers: { 'x-goog-api-key': key } });
-    if (!res.ok) throw new Error(friendly(readApiError(res.status, await res.text())));
-    pModels.set(70, 'Lendo a lista…');
-    const j = await res.json();
-    const names = (j.models || [])
-      .filter((m) => (m.supportedGenerationMethods || []).includes('generateContent'))
-      .map((m) => m.name.replace(/^models\//, ''));
-    const tts = rankModels('tts', names);
-    const txt = rankModels('text', names);
-    $('#dlText').innerHTML = txt.map((n) => '<option value="' + esc(n) + '">').join('');
-    $('#dlTts').innerHTML = tts.map((n) => '<option value="' + esc(n) + '">').join('');
-    const curText = $('#textModel').value.trim(), curTts = $('#ttsModel').value.trim();
-    if (txt.length) $('#textModel').value = txt[0];
-    if (tts.length) $('#ttsModel').value = tts[0];
-    pModels.set(100, 'Texto: ' + $('#textModel').value + ' · Voz: ' + $('#ttsModel').value);
-    LS.set('detected', '1');
-    LOG.i('modelos', 'detectados: ' + txt.length + ' de texto, ' + tts.length + ' de voz; escolhidos ' + $('#textModel').value + ' / ' + $('#ttsModel').value);
-    return true;
-  } catch (e) {
-    LOG.e('modelos', e);
-    pModels.hide();
-    banner(e.message === 'Failed to fetch' ? 'Sem conexão para detectar os modelos.' : e.message, 'err');
-    return false;
-  }
-}
-function saveSettings() {
-  S.key = $('#key').value.trim();
-  S.textModel = $('#textModel').value.trim() || S.textModel;
-  S.ttsModel = $('#ttsModel').value.trim() || S.ttsModel;
-  LS.set('gk', S.key); LS.set('textModel', S.textModel); LS.set('ttsModel', S.ttsModel);
-  $('#dlg').close ? $('#dlg').close() : $('#dlg').removeAttribute('open');
-  banner('Ajustes salvos.', 'ok');
-}
-$('#btnSettings').addEventListener('click', openSettings);
-$('#btnCloseDlg').addEventListener('click', () => { const d = $('#dlg'); d.close ? d.close() : d.removeAttribute('open'); });
-$('#btnDetect').addEventListener('click', detectModels);
-$('#btnSave').addEventListener('click', async () => {
-  const first = !LS.get('detected', '') && $('#key').value.trim();
-  if (first) await detectModels();            // na primeira vez, já escolhe os modelos disponíveis
-  saveSettings();
-});
-
-/* ============================================================
-   Montagem da tela e eventos
-   ============================================================ */
-function setMode(m) {
-  const quick = m === 'quick';
-  $('#tabQuick').setAttribute('aria-selected', String(quick));
-  $('#tabAdv').setAttribute('aria-selected', String(!quick));
-  $('#panelQuick').hidden = !quick;
-  $('#panelAdv').hidden = quick;
-}
-$('#tabQuick').addEventListener('click', () => setMode('quick'));
-$('#tabAdv').addEventListener('click', () => setMode('adv'));
-
-function syncEngine() {
-  const piper = S.engine === 'piper';
-  $('#engine').value = S.engine;
-  const list = piper ? PIPER_VOICES : VOICES;
-  const cur = piper ? S.pvoice : S.voice;
-  $('#voice').innerHTML = list.map((v) => '<option value="' + v[0] + '">' + v[1] + '</option>').join('');
-  $('#voice').value = list.some((v) => v[0] === cur) ? cur : list[0][0];
-  $('#engineHint').textContent = piper
-    ? 'Voz neural que roda no seu aparelho: sem cota e sem internet depois do primeiro download (cerca de 60 MB). Durante a geração, deixe o Safari aberto e a tela ligada.'
-    : 'Mais expressiva, mas o plano gratuito do Gemini limita as requisições de voz.';
-  $('#minsHint').textContent = piper ? 'Tamanho aproximado do áudio final.' : 'Cada cerca de 2 minutos de áudio usa 1 requisição de voz, e o plano gratuito do Gemini limita isso.';
-  updateStats();
-}
-$('#engine').addEventListener('change', () => { S.engine = $('#engine').value; LS.set('engine', S.engine); syncEngine(); });
-$('#voice').addEventListener('change', () => {
-  if (S.engine === 'piper') { S.pvoice = $('#voice').value; LS.set('pvoice', S.pvoice); }
-  else { S.voice = $('#voice').value; LS.set('voice', S.voice); }
-});
-$('#btnLive').addEventListener('click', toggleLive);
-
-$('#tone').innerHTML = Object.entries(TONES).map(([k, v]) => '<option value="' + k + '">' + v[0] + '</option>').join('');
-$('#toneChips').innerHTML = Object.entries(TONES).filter(([k]) => k !== 'neutro')
-  .map(([k, v]) => '<button type="button" data-tone="' + k + '" data-act>' + v[0] + '</button>').join('') +
-  '<button type="button" data-tone="neutro" data-act>Voltar ao normal</button>';
-$('#toneChips').addEventListener('click', (ev) => {
-  const b = ev.target.closest('button[data-tone]');
-  if (!b) return;
-  const k = b.dataset.tone;
-  runRevise({ instruction: 'Reescreva o roteiro inteiro no tom indicado, mantendo o conteúdo e o tamanho.', tone: k });
-});
-
-$('#mins').addEventListener('input', () => { $('#minsVal').textContent = $('#mins').value + ' min'; });
-$('#script').addEventListener('input', updateStats);
-
-$('#btnQuick').addEventListener('click', runQuick);
-$('#btnScript').addEventListener('click', runScript);
-$('#btnAudio').addEventListener('click', runAudio);
-$('#btnApply').addEventListener('click', () => runRevise({ instruction: $('#instr').value.trim(), tone: $('#tone').value }));
-$('#btnShorter').addEventListener('click', () => {
-  const w = wordCount($('#script').value);
-  runRevise({ instruction: 'Deixe o roteiro bem mais curto, mantendo só os pontos mais importantes e o mesmo tom.', tone: $('#tone').value, words: Math.max(80, Math.round(w * 0.55)) });
-});
-$('#btnLonger').addEventListener('click', () => {
-  const w = wordCount($('#script').value);
-  runRevise({ instruction: 'Deixe o roteiro mais longo e aprofundado, acrescentando detalhes, exemplos e explicações que existam no vídeo, sem inventar nada.', tone: $('#tone').value, words: Math.round(w * 1.6) });
-});
-
 function onUrlInput() {
   const id = ytId($('#url').value);
   const row = $('#thumbRow');
+  refreshPrompt();
   if (!id) { row.hidden = true; return; }
   const img = $('#thumb');
   img.onerror = () => { img.removeAttribute('src'); img.style.display = 'none'; };
@@ -1529,24 +987,167 @@ function onUrlInput() {
   row.hidden = false;
 }
 $('#url').addEventListener('input', onUrlInput);
+['#tone', '#mins', '#extra'].forEach((s) => $(s).addEventListener('input', refreshPrompt));
+$('#btnCopy').addEventListener('click', async () => {
+  banner('');
+  if (!ytId($('#url').value)) { banner('Cole primeiro um link válido do YouTube (watch, youtu.be ou shorts).', 'err'); $('#url').focus(); return; }
+  const ok = await copyText(currentPrompt());
+  LOG.i('ação', 'copiar prompt', { ok });
+  const b = $('#btnCopy');
+  b.textContent = ok ? 'Copiado! Agora abra o Gemini' : 'Não deu para copiar';
+  if (!ok) banner('Não consegui copiar sozinho. Abra “Ver o prompt completo”, toque e segure no texto e escolha Copiar.', 'err');
+  setTimeout(() => { b.textContent = 'Copiar prompt'; }, 3500);
+});
 
-function netState() {
-  const off = !navigator.onLine;
-  LOG.i('rede', off ? 'offline' : 'online');
-  const pill = $('#netPill');
-  pill.hidden = !off;
-  pill.className = 'pill off';
-  document.querySelectorAll('[data-act]').forEach((b) => { b.disabled = busy || off; });
-  if (off) banner('Sem internet: você pode ouvir seus episódios salvos, mas gerar novos precisa de conexão.', 'info');
+/* ============================================================
+   Passo 2: roteiro
+   ============================================================ */
+function updateStats() {
+  const w = wordCount($('#script').value);
+  $('#stWords').textContent = w + ' palavras';
+  $('#stDur').textContent = 'cerca de ' + fmtMin(w / WPM) + ' de áudio';
+  const n = chunkScript($('#script').value, 420).length;
+  $('#audioHint').textContent = w ? 'A voz será gerada em ' + n + (n === 1 ? ' trecho' : ' trechos') + '. Gerar leva alguns minutos.' : '';
 }
-window.addEventListener('online', () => { netState(); banner(''); });
-window.addEventListener('offline', netState);
-window.addEventListener('unhandledrejection', (e) => { banner((e.reason && e.reason.message) || 'Algo deu errado.', 'err'); });
+// Se o texto colado tem a linha "TÍTULO:", separa o título e limpa o resto.
+function normalizeScript() {
+  const raw = $('#script').value;
+  if (!raw.trim()) { updateStats(); return; }
+  const p = parseScript(raw);
+  if (p.title) { $('#title').value = p.title; $('#script').value = p.script; }
+  updateStats();
+}
+$('#script').addEventListener('input', updateStats);
+$('#script').addEventListener('paste', () => setTimeout(normalizeScript, 0));
+$('#script').addEventListener('change', normalizeScript);
+$('#btnPaste').addEventListener('click', async () => {
+  banner('');
+  try {
+    const t = await navigator.clipboard.readText();
+    if (!t.trim()) { banner('A área de transferência está vazia. Copie o roteiro no Gemini primeiro.', 'err'); return; }
+    $('#script').value = t;
+    normalizeScript();
+    LOG.i('ação', 'colar roteiro', { palavras: wordCount($('#script').value) });
+    banner('Roteiro colado. Confira e vá para o passo 3.', 'ok');
+  } catch (e) {
+    LOG.w('colar', 'readText falhou', e);
+    banner('O Safari não deixou colar sozinho. Toque e segure dentro da caixa do roteiro e escolha Colar.', 'info');
+    $('#script').focus();
+  }
+});
+
+/* ============================================================
+   Passo 3: gerar áudio
+   ============================================================ */
+async function runAudio() {
+  banner('');
+  normalizeScript();
+  const script = sanitizeScript($('#script').value);
+  if (wordCount(script) < 20) { banner('O roteiro está vazio ou muito curto. Cole o roteiro no passo 2.', 'err'); $('#script').focus(); return; }
+  LOG.i('ação', 'gerar áudio', { voz: S.pvoice, palavras: wordCount(script) });
+  lock(true); ctl = new AbortController();
+  try {
+    pAudio.show('Preparando a voz');
+    const wav = await makeAudio(script, ctl.signal, pAudio.sub(0, 95));
+    pAudio.set(95, 'Salvando para ouvir offline', 'Salvando');
+    const idv = ytId($('#url').value);
+    const id = await saveEpisode({
+      title: $('#title').value.trim() || ('Episódio de ' + new Date().toLocaleDateString('pt-BR')),
+      url: idv ? normUrl(idv) : '', script, voice: S.pvoice
+    }, wav);
+    pAudio.set(100, 'Pronto!', 'Concluído');
+    await loadLibrary();
+    setTimeout(() => pAudio.hide(), 900);
+    banner('Áudio pronto e salvo para ouvir offline.', 'ok');
+    await openEpisode(id, true);
+  } catch (e) {
+    const resumable = partial.pcm.length > 0 && !(e && e.name === 'AbortError');
+    failure(e, pAudio);
+    if (resumable) banner(e.message + ' Toque em Gerar áudio de novo: os ' + partial.pcm.length + ' trecho(s) já prontos são reaproveitados.', 'err');
+  } finally { lock(false); ctl = null; }
+}
+$('#btnAudio').addEventListener('click', runAudio);
+$('#btnLive').addEventListener('click', toggleLive);
+$('#voice').innerHTML = PIPER_VOICES.map((v) => '<option value="' + v[0] + '">' + v[1] + '</option>').join('');
+$('#voice').value = S.pvoice;
+$('#voice').addEventListener('change', () => { S.pvoice = $('#voice').value; LS.set('pvoice', S.pvoice); });
+$('#tone').innerHTML = Object.entries(TONES).map(([k, v]) => '<option value="' + k + '">' + v[0] + '</option>').join('');
+
+/* ============================================================
+   Limpeza
+   ============================================================ */
+$('#autodel').checked = LS.get('autodel', '0') === '1';
+$('#autodel').addEventListener('change', () => LS.set('autodel', $('#autodel').checked ? '1' : '0'));
+
+$('#btnClearAudio').addEventListener('click', async () => {
+  if (!eps.length) { banner('Não há áudios salvos.', 'info'); return; }
+  if (!confirm('Apagar TODOS os ' + eps.length + ' áudios deste aparelho? Isso não dá para desfazer.')) return;
+  lock(true);
+  pClear.show('Apagando os áudios');
+  try {
+    audio.pause();
+    pClear.set(30, 'Apagando os arquivos…');
+    await DB.clear('audio');
+    pClear.set(70, 'Limpando a lista…');
+    await DB.clear('eps');
+    if (cur.url) URL.revokeObjectURL(cur.url);
+    audio.removeAttribute('src'); audio.load();
+    $('#playerCard').hidden = true; cur = { id: null, url: null };
+    LOG.i('limpeza', 'todos os áudios apagados');
+    await loadLibrary();
+    pClear.set(100, 'Pronto');
+    setTimeout(() => pClear.hide(), 800);
+    banner('Todos os áudios foram apagados.', 'ok');
+  } catch (e) { failure(e, pClear); }
+  finally { lock(false); }
+});
+
+$('#btnClearVoice').addEventListener('click', async () => {
+  if (!confirm('Apagar a voz baixada e o cache de bibliotecas? Seus áudios ficam. Na próxima geração o app baixa a voz de novo (cerca de 60 MB).')) return;
+  lock(true);
+  pClear.show('Apagando a voz baixada');
+  try {
+    piperSession = null;
+    pClear.set(25, 'Limpando o cache de bibliotecas…');
+    if (window.caches) for (const k of await caches.keys()) if (/libs/.test(k)) await caches.delete(k);
+    pClear.set(60, 'Limpando os arquivos da voz…');
+    try {
+      const root = await navigator.storage.getDirectory();
+      const names = [];
+      for await (const entry of root.entries()) names.push(entry[0]);
+      for (const n of names) await root.removeEntry(n, { recursive: true });
+      LOG.i('limpeza', 'OPFS limpo: ' + names.length + ' itens');
+    } catch (e) { LOG.w('limpeza', 'OPFS indisponível ou vazio', e); }
+    pClear.set(90, 'Atualizando o espaço…');
+    await refreshUsage();
+    pClear.set(100, 'Pronto');
+    setTimeout(() => pClear.hide(), 800);
+    banner('Voz e cache apagados. Na próxima geração o app baixa a voz de novo.', 'ok');
+  } catch (e) { failure(e, pClear); }
+  finally { lock(false); }
+});
+
+$('#btnUpdate').addEventListener('click', async () => {
+  LOG.i('app', 'atualizar app solicitado');
+  pUpd.show('Atualizando o app');
+  try {
+    pUpd.set(20, 'Desligando o service worker…');
+    if ('serviceWorker' in navigator) for (const r of await navigator.serviceWorker.getRegistrations()) await r.unregister();
+    pUpd.set(55, 'Limpando o cache da página…');
+    for (const k of await caches.keys()) if (!/libs/.test(k)) await caches.delete(k);
+    pUpd.set(90, 'Recarregando…');
+    LOG.flush();
+    location.replace(location.pathname + '?atualizado=' + Date.now());
+  } catch (e) {
+    LOG.e('app', 'falha ao atualizar', e);
+    pUpd.hide();
+    banner('Não consegui atualizar: ' + e.message, 'err');
+  }
+});
 
 /* ============================================================
    Relatório de manutenção (botão 📖)
    ============================================================ */
-const pLog = new Progress($('#progLog'), null);
 async function buildReport(full, prog) {
   const L = [];
   const step = (p, note) => prog && prog(p, note);
@@ -1571,15 +1172,13 @@ async function buildReport(full, prog) {
     L.push('origem=' + location.origin + location.pathname);
   });
 
-  step(20, 'Configurações…');
-  L.push('--- CONFIG E ESTADO ---');
-  await safe('config', async () => {
-    L.push('motor=' + S.engine + ' vozPiper=' + S.pvoice + ' vozGemini=' + S.voice + ' modeloTexto=' + S.textModel + ' modeloVoz=' + S.ttsModel);
-    L.push('chave: ' + (S.key ? 'presente, ' + S.key.length + ' caracteres, formato AIza=' + /^AIza/.test(S.key) : 'AUSENTE'));
-    L.push('aba=' + ($('#panelQuick').hidden ? 'avançado' : 'rápido') + ' videoId=' + (ytId($('#url').value) || 'inválido/vazio') +
-      ' ocupado=' + busy + ' trechosProntosParaRetomar=' + partial.pcm.length);
-    L.push('barras: ' + [['rápido', pQuick], ['roteiro', pScript], ['reescrita', pRevise], ['áudio', pAudio]].map(([k, b]) => k + '=' + b.last + '%' + (b.el.hidden ? '(oculta)' : '')).join(' '));
-    L.push('roteiro: ' + wordCount($('#script').value) + ' palavras; áudio: src=' + !!audio.src + ' readyState=' + audio.readyState + ' dur=' + (isFinite(audio.duration) ? audio.duration.toFixed(1) : '?') + ' erro=' + (audio.error ? audio.error.code : 'nenhum'));
+  step(20, 'Estado…');
+  L.push('--- ESTADO ---');
+  await safe('estado', async () => {
+    L.push('vozPiper=' + S.pvoice + ' videoId=' + (ytId($('#url').value) || 'inválido/vazio') + ' ocupado=' + busy + ' trechosProntosParaRetomar=' + partial.pcm.length);
+    L.push('roteiro=' + wordCount($('#script').value) + ' palavras título="' + $('#title').value.slice(0, 60) + '" autoApagar=' + LS.get('autodel', '0'));
+    L.push('barras: ' + [['áudio', pAudio], ['limpeza', pClear]].map(([k, b]) => k + '=' + b.last + '%' + (b.el.hidden ? '(oculta)' : '')).join(' '));
+    L.push('player: src=' + !!audio.src + ' readyState=' + audio.readyState + ' dur=' + (isFinite(audio.duration) ? audio.duration.toFixed(1) : '?') + ' erro=' + (audio.error ? audio.error.code : 'nenhum'));
   });
 
   step(40, 'Armazenamento e cache…');
@@ -1632,21 +1231,10 @@ async function buildReport(full, prog) {
   L.push('--- LINHA DO TEMPO (' + tl.length + ' de ' + all.length + ' registros) ---');
   L.push(...lines(tl));
   L.push('=== FIM ===');
-  let text = LOG.redact(L.join('\n'));
+  let text = L.join('\n');
   if (!full && text.length > 16000) text = text.slice(0, 3000) + '\n…[cortado para ficar curto; marque "completo" se precisar]…\n' + text.slice(-12500);
   step(100, 'Pronto');
   return text;
-}
-
-async function copyText(t) {
-  try { await navigator.clipboard.writeText(t); return true; } catch (e) { /* tenta o método antigo */ }
-  try {
-    const ta = $('#logText');
-    ta.removeAttribute('readonly'); ta.focus(); ta.select(); ta.setSelectionRange(0, t.length);
-    const ok = document.execCommand('copy');
-    ta.setAttribute('readonly', ''); ta.blur();
-    return ok;
-  } catch (e) { return false; }
 }
 async function refreshReport() {
   const ta = $('#logText');
@@ -1679,31 +1267,25 @@ $('#btnLogDl').addEventListener('click', () => {
 $('#btnLogClear').addEventListener('click', async () => { LOG.clear(); LOG.i('app', 'logs limpos'); await refreshReport(); });
 $('#btnLogClose').addEventListener('click', () => { const d = $('#dlgLog'); d.close ? d.close() : d.removeAttribute('open'); });
 
-const pUpd = new Progress($('#progUpd'), null);
-$('#btnUpdate').addEventListener('click', async () => {
-  LOG.i('app', 'atualizar app solicitado');
-  pUpd.show('Atualizando o app');
-  try {
-    pUpd.set(20, 'Desligando o service worker…');
-    if ('serviceWorker' in navigator) for (const r of await navigator.serviceWorker.getRegistrations()) await r.unregister();
-    pUpd.set(55, 'Limpando o cache da página…');
-    for (const k of await caches.keys()) if (!/libs/.test(k)) await caches.delete(k);
-    pUpd.set(90, 'Recarregando…');
-    LOG.flush();
-    location.replace(location.pathname + '?atualizado=' + Date.now());
-  } catch (e) {
-    LOG.e('app', 'falha ao atualizar', e);
-    pUpd.hide();
-    banner('Não consegui atualizar: ' + e.message, 'err');
-  }
-});
+/* ============================================================
+   Início
+   ============================================================ */
+function netState() {
+  const off = !navigator.onLine;
+  LOG.i('rede', off ? 'offline' : 'online');
+  $('#netPill').hidden = !off;
+}
+window.addEventListener('online', netState);
+window.addEventListener('offline', netState);
+window.addEventListener('unhandledrejection', (e) => { banner((e.reason && e.reason.message) || 'Algo deu errado.', 'err'); });
 
 (async function init() {
   $('#appVer').textContent = 'Versão ' + APP_VERSION;
   if (/atualizado=/.test(location.search)) { try { history.replaceState(null, '', location.pathname); } catch (e) { /* ok */ } }
-  LOG.i('app', 'init ' + APP_VERSION + ': motor=' + S.engine + ' chave=' + (S.key ? 'sim' : 'não') + ' online=' + navigator.onLine);
+  LOG.i('app', 'init ' + APP_VERSION + ': voz=' + S.pvoice + ' online=' + navigator.onLine);
   netState();
-  syncEngine();
+  refreshPrompt();
+  updateStats();
   await loadLibrary();
   try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) { /* ok */ }
   if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
@@ -1714,7 +1296,6 @@ $('#btnUpdate').addEventListener('click', async () => {
       navigator.serviceWorker.addEventListener('controllerchange', () => LOG.i('sw', 'novo controlador assumiu'));
     } catch (e) { LOG.e('sw', 'registro falhou (sem offline do app; o áudio continua salvo)', e); }
   }
-  if (!S.key) banner('Para começar, abra Ajustes e cole sua chave do Gemini (grátis).', 'info');
 })();
 </script>
 </body>
